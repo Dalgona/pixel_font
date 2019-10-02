@@ -48,7 +48,10 @@ defmodule PixelFont.TableSource.GSUB do
     {from_glyphs, to_glyphs} =
       subtable.substitutions
       |> Enum.map(fn {from, to} ->
-        {GlyphStorage.get(from).index, GlyphStorage.get(to).index}
+        from_id = get_glyph_id(from)
+        to_id = get_glyph_id(to)
+
+        {GlyphStorage.get(from_id).index, GlyphStorage.get(to_id).index}
       end)
       |> Enum.sort(&(elem(&1, 0) <= elem(&2, 0)))
       |> Enum.unzip()
@@ -163,7 +166,7 @@ defmodule PixelFont.TableSource.GSUB do
     seq
     |> Enum.map(fn glyphs ->
       glyphs
-      |> Enum.map(&GlyphStorage.get(&1).index)
+      |> Enum.map(&GlyphStorage.get(get_glyph_id(&1)).index)
       |> Enum.sort()
       |> compile_coverage()
     end)
