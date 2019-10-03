@@ -1,5 +1,6 @@
 defmodule PixelFont.TableSource.OTFLayout.LookupList do
   alias PixelFont.TableSource.OTFLayout.Lookup
+  alias PixelFont.Util
 
   defstruct ~w(lookups)a
 
@@ -11,18 +12,8 @@ defmodule PixelFont.TableSource.OTFLayout.LookupList do
     offset_base = 2 + lookup_count * 2
 
     {_, offsets, tables} =
-      Enum.reduce(lookups, {0, [], []}, fn lookup, {pos, offsets, tables} ->
-        table = Lookup.compile(lookup, opts)
+      Util.offsetted_binaries(lookups, offset_base, &Lookup.compile(&1, opts))
 
-        {pos + byte_size(table), [offset_base + pos | offsets], [table | tables]}
-      end)
-
-    data = [
-      <<lookup_count::16>>,
-      offsets |> Enum.reverse() |> Enum.map(&<<&1::16>>),
-      Enum.reverse(tables)
-    ]
-
-    IO.iodata_to_binary(data)
+    IO.iodata_to_binary([<<lookup_count::16>>, offsets, tables])
   end
 end
