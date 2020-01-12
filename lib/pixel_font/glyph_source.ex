@@ -1,4 +1,4 @@
-defmodule PixelFont.BMPGlyphs do
+defmodule PixelFont.GlyphSource do
   alias PixelFont.RectilinearShape
   alias PixelFont.RectilinearShape.Path
 
@@ -12,7 +12,7 @@ defmodule PixelFont.BMPGlyphs do
     end
   end
 
-  defmacro glyph([{type, id}], do: block) when type in ~w(unicode name)a do
+  defmacro bmp_glyph([{type, id}], do: block) when type in ~w(unicode name)a do
     attrs =
       block
       |> elem(2)
@@ -36,6 +36,28 @@ defmodule PixelFont.BMPGlyphs do
         contours: unquote(contours)
       }
       |> Map.merge(unquote(Macro.escape(attrs)))
+    end
+  end
+
+  defmacro composite_glyph([{type, id}], do: do_block) when type in ~w(unicode name)a do
+    exprs = get_exprs(do_block)
+
+    quote do
+      %{
+        type: unquote(type),
+        id: unquote(id),
+        components: Enum.reject(unquote(exprs), &is_nil/1)
+      }
+    end
+  end
+
+  defmacro component(glyph_id, x_off, y_off) do
+    quote do
+      %{
+        glyph: unquote(glyph_id),
+        x_offset: unquote(x_off),
+        y_offset: unquote(y_off)
+      }
     end
   end
 
