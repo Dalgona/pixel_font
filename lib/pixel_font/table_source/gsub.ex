@@ -1,6 +1,7 @@
 defmodule PixelFont.TableSource.GSUB do
   alias PixelFont.CompiledTable
   alias PixelFont.GlyphStorage
+  alias PixelFont.TableSource.GSUB.Subtable
   alias PixelFont.TableSource.OTFLayout.FeatureList
   alias PixelFont.TableSource.OTFLayout.GlyphCoverage
   alias PixelFont.TableSource.OTFLayout.LookupList
@@ -226,6 +227,10 @@ defmodule PixelFont.TableSource.GSUB do
     ]
 
     IO.iodata_to_binary(data)
+  end
+
+  def compile_subtable(subtable, _lookup_type, opts) do
+    Subtable.compile(subtable, opts)
   end
 
   defp make_coverage_records(sequences, offset_base) do
