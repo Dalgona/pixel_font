@@ -1,9 +1,15 @@
 defmodule PixelFont.Builder do
   alias PixelFont.GlyphStorage
-  alias PixelFont.TableSource.{Cmap, Glyf, GSUB, Head, Hmtx, Maxp, Name, OS_2, Post}
+  alias PixelFont.TableSource.{Cmap, Glyf, GPOS, GSUB, Head, Hmtx, Maxp, Name, OS_2, Post}
   alias PixelFont.TableSource.OTFLayout.{ScriptList, FeatureList, LookupList}
 
   @default_gsub %GSUB{
+    script_list: %ScriptList{scripts: []},
+    feature_list: %FeatureList{features: []},
+    lookup_list: %LookupList{lookups: []}
+  }
+
+  @default_gpos %GPOS{
     script_list: %ScriptList{scripts: []},
     feature_list: %FeatureList{features: []},
     lookup_list: %LookupList{lookups: []}
@@ -16,6 +22,7 @@ defmodule PixelFont.Builder do
     hmtx = Hmtx.generate()
     maxp = Maxp.generate()
     gsub = Map.merge(@default_gsub, params[:gsub] || %{})
+    gpos = Map.merge(@default_gpos, params[:gpos] || %{})
 
     compiled_tables = [
       Glyf.compile(glyf),
@@ -25,7 +32,8 @@ defmodule PixelFont.Builder do
       Cmap.compile(),
       Post.compile(params.metrics, 2),
       OS_2.compile(params.os_2, params.metrics, 4),
-      GSUB.compile(gsub)
+      GSUB.compile(gsub),
+      GPOS.compile(gpos)
     ]
 
     :ok = GenServer.stop(GlyphStorage)
