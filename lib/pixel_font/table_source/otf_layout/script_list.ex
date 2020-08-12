@@ -1,7 +1,7 @@
 defmodule PixelFont.TableSource.OTFLayout.ScriptList do
   alias PixelFont.TableSource.OTFLayout.Script
 
-  defstruct ~w(scripts)a
+  defstruct scripts: []
 
   @type t :: %__MODULE__{scripts: [Script.t()]}
 

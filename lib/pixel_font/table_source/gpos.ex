@@ -6,13 +6,11 @@ defmodule PixelFont.TableSource.GPOS do
   alias PixelFont.TableSource.OTFLayout.ScriptList
   alias PixelFont.Util
 
-  defstruct [
-    :script_list,
-    :feature_list,
-    :lookup_list,
-    :feature_indices,
-    :lookup_indices
-  ]
+  defstruct script_list: %ScriptList{},
+            feature_list: %FeatureList{},
+            lookup_list: %LookupList{},
+            feature_indices: %{},
+            lookup_indices: %{}
 
   @type t :: %__MODULE__{
           script_list: ScriptList.t(),

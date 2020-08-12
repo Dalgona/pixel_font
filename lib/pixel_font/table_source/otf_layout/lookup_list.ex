@@ -2,7 +2,7 @@ defmodule PixelFont.TableSource.OTFLayout.LookupList do
   alias PixelFont.TableSource.OTFLayout.Lookup
   alias PixelFont.Util
 
-  defstruct ~w(lookups)a
+  defstruct lookups: []
 
   @type t :: %__MODULE__{lookups: [Lookup.t()]}
 

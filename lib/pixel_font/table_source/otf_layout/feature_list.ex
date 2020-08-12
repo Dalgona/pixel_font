@@ -1,7 +1,7 @@
 defmodule PixelFont.TableSource.OTFLayout.FeatureList do
   alias PixelFont.TableSource.OTFLayout.Feature
 
-  defstruct ~w(features)a
+  defstruct features: []
 
   @type t :: %__MODULE__{features: [Feature.t()]}
 
