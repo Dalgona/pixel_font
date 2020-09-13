@@ -2,10 +2,11 @@
   inputs: ["mix.exs", "{config,lib,test}/**/*.{ex,exs}"],
   locals_without_parens: [
     export_glyphs: 1,
-    bmp_glyph: :"*",
-    composite_glyph: :"*",
+    bmp_glyph: :*,
+    composite_glyph: :*,
     component: 3,
     advance: 1,
+    bounds: 2,
     xmin: 1,
     xmax: 1,
     ymin: 1,
