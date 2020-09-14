@@ -7,7 +7,7 @@
 ## Features
 
 - Builds full-featured font files which can be used in serious places.
-- Generates optimal pixellated TrueType outline based on 1bpp bitmap images.
+- Generates optimal pixelated TrueType outlines based on 1bpp bitmap images.
 - Supports creating fonts with OpenType advanced typographic features, namely GPOS and GSUB.
 - Provides DSL and data structures for defining...
   - Font metadata,
@@ -27,7 +27,7 @@ If you are in doubt, see [The NeoDunggeunmo Project](https://github.com/Dalgona/
 
 Copyright 2020 Eunbin Jeong (Dalgona.) &lt;me@dalgona.dev&gt;
 
-This software is not yet released for general availavility, and it shall be used only for building font projects I am working on, just for now. Once this project is mature enough, it will be released under the MIT license.
+This software is not yet released for general availability, and it shall be used only for building font projects I am working on, just for now. Once this project is mature enough, it will be released under the MIT license.
 
 _OpenType is a registered trademark of Microsoft Corporation._
 
