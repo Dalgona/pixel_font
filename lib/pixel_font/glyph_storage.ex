@@ -1,8 +1,8 @@
 defmodule PixelFont.GlyphStorage do
   use GenServer
 
-  def start_link(glyph_sources) do
-    GenServer.start_link(__MODULE__, glyph_sources, name: __MODULE__)
+  def start_link(glyph_sources, notdef_source) do
+    GenServer.start_link(__MODULE__, {glyph_sources, notdef_source}, name: __MODULE__)
   end
 
   def all do
@@ -14,11 +14,16 @@ defmodule PixelFont.GlyphStorage do
   end
 
   @impl GenServer
-  def init(glyph_sources) do
+  def init({glyph_sources, notdef_source}) do
     glyphs =
       glyph_sources
       |> Enum.map(& &1.glyphs)
       |> List.flatten()
+
+    notdef =
+      notdef_source.glyphs
+      |> Enum.filter(&(&1.id === ".notdef"))
+      |> Enum.take(1)
 
     groups = Enum.group_by(glyphs, & &1.type)
     unicode_glyphs = groups[:unicode] || []
@@ -26,6 +31,7 @@ defmodule PixelFont.GlyphStorage do
 
     sorted_glyphs =
       [
+        notdef,
         Enum.sort(unicode_glyphs, &(&1.id <= &2.id)),
         named_glyphs
       ]

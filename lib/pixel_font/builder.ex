@@ -16,7 +16,7 @@ defmodule PixelFont.Builder do
   }
 
   def build_ttf(params) do
-    {:ok, _} = GlyphStorage.start_link(params.glyph_sources)
+    {:ok, _} = GlyphStorage.start_link(params.glyph_sources, params.notdef_glyph)
 
     glyf = Glyf.generate()
     hmtx = Hmtx.generate()
