@@ -35,26 +35,17 @@ defmodule PixelFont.TableSource.Name do
   end
 
   @spec prepare_records(map()) :: list()
-  defp prepare_records(map) do
-    {:ok, agent} = Agent.start_link(fn -> [] end)
+  defp prepare_records(maps) do
+    maps
+    |> Enum.map(fn map ->
+      platform = map.platform
 
-    Enum.each(map, fn {platform, encodings} ->
-      Enum.each(encodings, fn {encoding, languages} ->
-        Enum.each(languages, fn {lang, names} ->
-          Enum.each(names, fn {name, value} ->
-            data = get_encoded_data(value, platform)
-            record = {platform, encoding, lang, name, data}
-
-            Agent.update(agent, &[record | &1])
-          end)
-        end)
+      Enum.map(map.records, fn {name_id, data} ->
+        {platform, map.encoding, map.language, name_id, get_encoded_data(data, platform)}
       end)
     end)
-
-    result = Agent.get(agent, &Enum.reverse/1)
-    :ok = Agent.stop(agent)
-
-    result
+    |> List.flatten()
+    |> Enum.sort()
   end
 
   @spec get_encoded_data(binary(), integer()) :: binary()
