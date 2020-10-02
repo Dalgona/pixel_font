@@ -65,6 +65,20 @@ defmodule PixelFont.TableSource.Name.Definitions do
     postscript_cid_findfont_name: 20
   }
 
+  @spec windows_lang_id(binary()) :: integer()
+  def windows_lang_id(name)
+
+  :pixel_font
+  |> :code.priv_dir()
+  |> Path.join("language_ids.txt")
+  |> File.stream!()
+  |> Enum.each(fn line ->
+    [code, name] = line |> String.split(~r/\s+/, trim: true) |> Enum.map(&String.trim/1)
+    {code, _} = Integer.parse(code, 16)
+
+    def windows_lang_id(unquote(name)), do: unquote(code)
+  end)
+
   @spec platform_id(atom()) :: integer()
   def platform_id(name)
 
