@@ -2,6 +2,7 @@
   inputs: ["mix.exs", "{config,lib,test}/**/*.{ex,exs}"],
   export: [
     locals_without_parens: [
+      # From the Glyph Source DSL (PixelFont.GlyphSource)
       export_glyphs: 1,
       bmp_glyph: 2,
       composite_glyph: 2,
@@ -9,11 +10,9 @@
       component: 4,
       advance: 1,
       bounds: 2,
-      xmin: 1,
-      xmax: 1,
-      ymin: 1,
-      ymax: 1,
       data: 1,
+
+      # From the Name Table DSL (PixelFont.NameTable)
       name_table: 2,
       name_records: 2,
       copyright: 1,
