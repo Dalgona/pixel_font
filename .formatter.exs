@@ -14,7 +14,8 @@
       ymin: 1,
       ymax: 1,
       data: 1,
-      name_table: 1,
+      name_table: 2,
+      name_records: 2,
       platform: 2,
       encoding: 2,
       language: 2,
@@ -36,7 +37,8 @@
       typographic_family: 1,
       typographic_subfamily: 1,
       sample_text: 1,
-      postscript_cid_findfont_name: 1
+      postscript_cid_findfont_name: 1,
+      font_specific_name: 2
     ]
   ]
 ]
