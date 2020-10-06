@@ -4,10 +4,45 @@ defmodule PixelFont.TableSource.OS_2 do
   alias PixelFont.TableSource.OS_2.Enums
   alias PixelFont.TableSource.OS_2.UnicodeRanges
 
-  @spec compile(map(), map(), integer()) :: CompiledTable.t()
+  defstruct avg_char_width: :auto,
+            weight_class: :normal,
+            width_class: :normal,
+            subscript_size: {0, 0},
+            subscript_offset: {0, 0},
+            superscript_size: {0, 0},
+            superscript_offset: {0, 0},
+            strike_size: 1,
+            strike_position: 0,
+            family_class: {:sans_serif, :no_classification},
+            panose: <<0, 0, 0, 0, 0, 0, 0, 0, 0, 0>>,
+            vendor_id: <<0, 0, 0, 0>>,
+            x_height: 0,
+            cap_height: 0
+
+  @type t :: %__MODULE__{
+          avg_char_width: non_neg_integer() | :auto,
+          weight_class: Enums.weight_class(),
+          width_class: Enums.width_class(),
+          subscript_size: size(),
+          subscript_offset: offset(),
+          superscript_size: size(),
+          superscript_offset: offset(),
+          strike_size: non_neg_integer(),
+          strike_position: integer(),
+          family_class: {atom(), atom()},
+          panose: <<_::80>>,
+          vendor_id: <<_::32>>,
+          x_height: non_neg_integer(),
+          cap_height: non_neg_integer()
+        }
+
+  @type size :: {non_neg_integer(), non_neg_integer()}
+  @type offset :: {integer(), integer()}
+
+  @spec compile(t(), map(), integer()) :: CompiledTable.t()
   def compile(params, metrics, version)
 
-  def compile(params, metrics, 4) do
+  def compile(%__MODULE__{} = params, metrics, 4) do
     all_glyphs = GlyphStorage.all()
     unicode_glyphs = Enum.filter(all_glyphs, &(&1.type === :unicode))
     avg_char_width = calculate_avg_char_width(all_glyphs, params)
@@ -36,7 +71,7 @@ defmodule PixelFont.TableSource.OS_2 do
       <<params.strike_size::16>>,
       <<params.strike_position::16>>,
       <<Enums.family_class(params.family_class)::little-16>>,
-      for(x <- params.panose, into: "", do: <<x::8>>),
+      params.panose,
       # ulUnicodeRange1..4
       UnicodeRanges.generate(unicode_glyphs),
       params.vendor_id,
