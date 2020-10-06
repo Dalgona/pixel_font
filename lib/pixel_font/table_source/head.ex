@@ -5,7 +5,7 @@ defmodule PixelFont.TableSource.Head do
 
   @spec compile(Version.t(), Glyf.t(), Metrics.t()) :: CompiledTable.t()
   def compile(version, glyf, %Metrics{} = metrics) do
-    ver_frac = trunc(655.36 * (version.minor * 10 + version.patch))
+    ver_frac = trunc(65.536 * (version.minor * 100 + version.patch))
     epoch = :calendar.datetime_to_gregorian_seconds({{1904, 1, 1}, {0, 0, 0}})
     now = :calendar.datetime_to_gregorian_seconds(:calendar.local_time())
     timestamp = <<now - epoch::64>>
