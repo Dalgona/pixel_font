@@ -1,5 +1,6 @@
 defmodule PixelFont.TableSource.Hmtx do
   alias PixelFont.CompiledTable
+  alias PixelFont.Font.Metrics
   alias PixelFont.GlyphStorage
   alias PixelFont.TableSource.Hmtx.Record
 
@@ -14,8 +15,8 @@ defmodule PixelFont.TableSource.Hmtx do
     %__MODULE__{records: Enum.map(glyphs, &Record.new/1)}
   end
 
-  @spec compile(t(), map()) :: [CompiledTable.t()]
-  def compile(hmtx, metrics) do
+  @spec compile(t(), Metrics.t()) :: [CompiledTable.t()]
+  def compile(hmtx, %Metrics{} = metrics) do
     [
       compile_hmtx(hmtx),
       compile_hhea(hmtx, metrics)
@@ -32,8 +33,8 @@ defmodule PixelFont.TableSource.Hmtx do
     CompiledTable.new("hmtx", hmtx_data)
   end
 
-  @spec compile_hhea(t(), map()) :: CompiledTable.t()
-  defp compile_hhea(hmtx, metrics) do
+  @spec compile_hhea(t(), Metrics.t()) :: CompiledTable.t()
+  defp compile_hhea(hmtx, %Metrics{} = metrics) do
     [adv, lsb, rsb, ext] =
       hmtx.records
       |> Enum.reject(& &1.glyph_empty?)

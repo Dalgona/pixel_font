@@ -1,12 +1,13 @@
 defmodule PixelFont.TableSource.Post do
   alias PixelFont.CompiledTable
+  alias PixelFont.Font.Metrics
   alias PixelFont.GlyphStorage
   alias PixelFont.TableSource.Post.AGLFN
 
-  @spec compile(map(), integer()) :: CompiledTable.t()
+  @spec compile(Metrics.t(), integer()) :: CompiledTable.t()
   def compile(metrics, version)
 
-  def compile(metrics, 2) do
+  def compile(%Metrics{} = metrics, 2) do
     [_notdef | all_glyphs] = GlyphStorage.all()
     aglfn = AGLFN.get_map()
 

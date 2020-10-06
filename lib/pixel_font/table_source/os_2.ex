@@ -1,5 +1,6 @@
 defmodule PixelFont.TableSource.OS_2 do
   alias PixelFont.CompiledTable
+  alias PixelFont.Font.Metrics
   alias PixelFont.GlyphStorage
   alias PixelFont.TableSource.OS_2.Enums
   alias PixelFont.TableSource.OS_2.UnicodeRanges
@@ -39,10 +40,10 @@ defmodule PixelFont.TableSource.OS_2 do
   @type size :: {non_neg_integer(), non_neg_integer()}
   @type offset :: {integer(), integer()}
 
-  @spec compile(t(), map(), integer()) :: CompiledTable.t()
+  @spec compile(t(), Metrics.t(), integer()) :: CompiledTable.t()
   def compile(params, metrics, version)
 
-  def compile(%__MODULE__{} = params, metrics, 4) do
+  def compile(%__MODULE__{} = params, %Metrics{} = metrics, 4) do
     all_glyphs = GlyphStorage.all()
     unicode_glyphs = Enum.filter(all_glyphs, &(&1.type === :unicode))
     avg_char_width = calculate_avg_char_width(all_glyphs, params)

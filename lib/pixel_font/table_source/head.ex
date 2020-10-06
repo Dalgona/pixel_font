@@ -1,9 +1,10 @@
 defmodule PixelFont.TableSource.Head do
   alias PixelFont.CompiledTable
+  alias PixelFont.Font.Metrics
   alias PixelFont.TableSource.Glyf
 
-  @spec compile(Version.t(), Glyf.t(), map()) :: CompiledTable.t()
-  def compile(version, glyf, metrics) do
+  @spec compile(Version.t(), Glyf.t(), Metrics.t()) :: CompiledTable.t()
+  def compile(version, glyf, %Metrics{} = metrics) do
     ver_frac = trunc(655.36 * (version.minor * 10 + version.patch))
     epoch = :calendar.datetime_to_gregorian_seconds({{1904, 1, 1}, {0, 0, 0}})
     now = :calendar.datetime_to_gregorian_seconds(:calendar.local_time())

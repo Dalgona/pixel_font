@@ -1,44 +1,30 @@
 defmodule PixelFont.Builder do
+  alias PixelFont.Font
   alias PixelFont.GlyphStorage
   alias PixelFont.TableSource.{Cmap, Glyf, GPOS, GSUB, Head, Hmtx, Maxp, Name, OS_2, Post}
-  alias PixelFont.TableSource.OTFLayout.{ScriptList, FeatureList, LookupList}
 
-  @default_gsub %GSUB{
-    script_list: %ScriptList{scripts: []},
-    feature_list: %FeatureList{features: []},
-    lookup_list: %LookupList{lookups: []}
-  }
-
-  @default_gpos %GPOS{
-    script_list: %ScriptList{scripts: []},
-    feature_list: %FeatureList{features: []},
-    lookup_list: %LookupList{lookups: []}
-  }
-
-  def build_ttf(params) do
-    {:ok, _} = GlyphStorage.start_link(params.glyph_sources, params.notdef_glyph)
+  def build_ttf(%Font{} = font) do
+    {:ok, _} = GlyphStorage.start_link(font.glyph_sources, font.notdef_glyph)
 
     glyf = Glyf.generate()
     hmtx = Hmtx.generate()
     maxp = Maxp.generate()
-    gsub = Map.merge(@default_gsub, params[:gsub] || %{})
-    gpos = Map.merge(@default_gpos, params[:gpos] || %{})
 
     compiled_tables = [
       Glyf.compile(glyf),
-      Hmtx.compile(hmtx, params.metrics),
+      Hmtx.compile(hmtx, font.metrics),
       Maxp.compile(maxp),
-      Name.compile(params.name_table, 0),
+      Name.compile(font.name_table, 0),
       Cmap.compile(),
-      Post.compile(params.metrics, 2),
-      OS_2.compile(params.os_2, params.metrics, 4),
-      GSUB.compile(gsub),
-      GPOS.compile(gpos)
+      Post.compile(font.metrics, 2),
+      OS_2.compile(font.os_2, font.metrics, 4),
+      GPOS.compile(font.gpos),
+      GSUB.compile(font.gsub)
     ]
 
     :ok = GenServer.stop(GlyphStorage)
 
-    head = Head.compile(params.version, glyf, params.metrics)
+    head = Head.compile(font.version, glyf, font.metrics)
     tables = sort_tables([head, compiled_tables])
     preamble = make_preamble(tables)
     table_record = make_table_record(tables)
