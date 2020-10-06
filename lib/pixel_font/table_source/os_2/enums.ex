@@ -1,28 +1,59 @@
 defmodule PixelFont.TableSource.OS_2.Enums do
-  @spec weight_class(atom() | integer()) :: integer()
+  weight_classes = [
+    thin: 100,
+    extra_light: 200,
+    light: 300,
+    normal: 400,
+    medium: 500,
+    semi_bold: 600,
+    bold: 700,
+    extra_bold: 800,
+    black: 900
+  ]
+
+  weight_class_type_expr =
+    weight_classes
+    |> Keyword.keys()
+    |> Enum.reverse()
+    |> Enum.reduce({:non_neg_integer, [], []}, &{:|, [], [&1, &2]})
+
+  @type weight_class :: unquote(weight_class_type_expr)
+
+  @spec weight_class(weight_class()) :: integer()
   def weight_class(value)
-  def weight_class(:thin), do: 100
-  def weight_class(:extra_light), do: 200
-  def weight_class(:light), do: 300
-  def weight_class(:normal), do: 400
-  def weight_class(:medium), do: 500
-  def weight_class(:semi_bold), do: 600
-  def weight_class(:bold), do: 700
-  def weight_class(:extra_bold), do: 800
-  def weight_class(:black), do: 900
+
+  Enum.each(weight_classes, fn {key, value} ->
+    def weight_class(unquote(key)), do: unquote(value)
+  end)
+
   def weight_class(value) when is_integer(value), do: value
 
-  @spec width_class(atom()) :: integer()
+  width_classes = [
+    ultra_condensed: 1,
+    extra_condensed: 2,
+    condensed: 3,
+    semi_condensed: 4,
+    medium: 5,
+    semi_expanded: 6,
+    expanded: 7,
+    extra_expanded: 8,
+    ultra_expanded: 9
+  ]
+
+  width_class_type_expr =
+    width_classes
+    |> Keyword.keys()
+    |> Enum.reverse()
+    |> Enum.reduce(&{:|, [], [&1, &2]})
+
+  @type width_class :: unquote(width_class_type_expr)
+
+  @spec width_class(width_class()) :: integer()
   def width_class(value)
-  def width_class(:ultra_condensed), do: 1
-  def width_class(:extra_condensed), do: 2
-  def width_class(:condensed), do: 3
-  def width_class(:semi_condensed), do: 4
-  def width_class(:medium), do: 5
-  def width_class(:semi_expanded), do: 6
-  def width_class(:expanded), do: 7
-  def width_class(:extra_expanded), do: 8
-  def width_class(:ultra_expanded), do: 9
+
+  Enum.each(width_classes, fn {key, value} ->
+    def width_class(unquote(key)), do: unquote(value)
+  end)
 
   family_class_data = %{
     oldstyle_serif:
