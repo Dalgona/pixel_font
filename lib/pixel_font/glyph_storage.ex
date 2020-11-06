@@ -1,5 +1,7 @@
 defmodule PixelFont.GlyphStorage do
   use GenServer
+  alias PixelFont.Glyph
+  alias PixelFont.Glyph.{BitmapData, CompositeData}
 
   def start_link(glyph_sources, notdef_source) do
     GenServer.start_link(__MODULE__, {glyph_sources, notdef_source}, name: __MODULE__)
@@ -25,9 +27,9 @@ defmodule PixelFont.GlyphStorage do
       |> Enum.filter(&(&1.id === ".notdef"))
       |> Enum.take(1)
 
-    groups = Enum.group_by(glyphs, & &1.type)
-    unicode_glyphs = groups[:unicode] || []
-    named_glyphs = groups[:name] || []
+    groups = Enum.group_by(glyphs, &is_integer(&1.id))
+    unicode_glyphs = groups[true] || []
+    named_glyphs = groups[false] || []
 
     sorted_glyphs =
       [
@@ -56,28 +58,24 @@ defmodule PixelFont.GlyphStorage do
     {:reply, map[id], state}
   end
 
-  defp make_lookup(glyphs) do
-    glyphs
-    |> Enum.map(&{{&1.type, &1.id}, &1})
-    |> Map.new()
-  end
+  defp make_lookup(glyphs), do: Map.new(glyphs, &{&1.id, &1})
 
   defp set_glyph_index(glyphs, acc, index)
   defp set_glyph_index([], acc, _), do: Enum.reverse(acc)
 
   defp set_glyph_index([g | gs], acc, index) do
-    set_glyph_index(gs, [Map.put(g, :index, index) | acc], index + 1)
+    set_glyph_index(gs, [%Glyph{g | gid: index} | acc], index + 1)
   end
 
   defp link_composite(glyph, lookup)
-  defp link_composite(%{contours: _} = simple, _lookup), do: simple
+  defp link_composite(%Glyph{data: %BitmapData{}} = simple, _lookup), do: simple
 
-  defp link_composite(%{components: components} = composite, lookup) do
+  defp link_composite(%Glyph{data: %CompositeData{components: components}} = composite, lookup) do
     linked_components =
-      Enum.map(components, fn %{glyph: glyph_id} = component ->
+      Enum.map(components, fn %{glyph_id: glyph_id} = component ->
         %{component | glyph: lookup[glyph_id]}
       end)
 
-    %{composite | components: linked_components}
+    %Glyph{composite | data: %CompositeData{components: linked_components}}
   end
 end
