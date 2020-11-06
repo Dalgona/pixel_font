@@ -1,6 +1,8 @@
 defmodule PixelFont.GlyphSource do
   require PixelFont.RectilinearShape, as: RectilinearShape
   require PixelFont.RectilinearShape.Path, as: Path
+  alias PixelFont.Glyph
+  alias PixelFont.Glyph.{BitmapData, CompositeData}
 
   @type source_options :: [based_on: module()]
 
@@ -55,21 +57,20 @@ defmodule PixelFont.GlyphSource do
             "as an atom or an alias in compilation time, got: #{inspect(x)}"
   end
 
-  defmacro bmp_glyph([{type, id}], do: block) when type in ~w(unicode name)a do
-    exprs = get_exprs(block)
-
-    map_expr =
+  defmacro bmp_glyph(id, do: block) do
+    {
+      id,
       quote do
-        [
-          {:type, unquote(type)},
-          {:id, unquote(id)},
-          {:contours, unquote(nil)}
-          | List.flatten(unquote(exprs))
-        ]
-        |> Map.new()
+        %Glyph{
+          id: unquote(id),
+          data:
+            struct!(
+              BitmapData,
+              [{:contours, []} | List.flatten(unquote(get_exprs(block)))]
+            )
+        }
       end
-
-    {{type, id}, map_expr}
+    }
   end
 
   Enum.each(~w(advance data)a, fn key ->
@@ -88,33 +89,34 @@ defmodule PixelFont.GlyphSource do
   def __make_contours__(glyphs) do
     glyphs
     |> Task.async_stream(fn
-      {id, %{data: data, xmin: xmin, ymax: ymax} = glyph} ->
+      {id, %Glyph{data: %BitmapData{} = data} = glyph} ->
         contours =
-          data
+          data.data
           |> String.split(~r/\r?\n/, trim: true)
           |> Enum.map(&to_charlist/1)
           |> RectilinearShape.from_bmp()
-          |> Path.transform({{1, 0}, {0, -1}}, {xmin, ymax})
+          |> Path.transform({{1, 0}, {0, -1}}, {data.xmin, data.ymax})
 
-        {id, %{glyph | contours: contours}}
+        {id, %Glyph{glyph | data: %BitmapData{data | contours: contours}}}
 
-      {id, %{} = glyph} ->
+      {id, %Glyph{} = glyph} ->
         {id, glyph}
     end)
     |> Enum.map(&elem(&1, 1))
   end
 
-  defmacro composite_glyph([{type, id}], do: do_block) when type in ~w(unicode name)a do
-    exprs = get_exprs(do_block)
-
-    quote do
-      {{unquote(type), unquote(id)},
-       %{
-         type: unquote(type),
-         id: unquote(id),
-         components: Enum.reject(unquote(exprs), &is_nil/1)
-       }}
-    end
+  defmacro composite_glyph(id, do: block) do
+    {
+      id,
+      quote do
+        %Glyph{
+          id: unquote(id),
+          data: %CompositeData{
+            components: Enum.reject(unquote(get_exprs(block)), &is_nil/1)
+          }
+        }
+      end
+    }
   end
 
   defmacro component(glyph_id, x_off, y_off) do
@@ -128,7 +130,8 @@ defmodule PixelFont.GlyphSource do
   defp handle_component(glyph_id, x_off, y_off, opts) do
     quote do
       %{
-        glyph: unquote(glyph_id),
+        glyph_id: unquote(glyph_id),
+        glyph: nil,
         x_offset: unquote(x_off),
         y_offset: unquote(y_off),
         flags: unquote(opts)[:flags] || []
