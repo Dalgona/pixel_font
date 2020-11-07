@@ -1,6 +1,6 @@
 defmodule PixelFont.TableSource.OTFLayout.GlyphCoverage do
-  alias PixelFont.GlyphStorage
-  alias PixelFont.Util
+  require PixelFont.Util, as: Util
+  import Util, only: :macros
 
   defstruct [:glyphs]
 
@@ -56,7 +56,7 @@ defmodule PixelFont.TableSource.OTFLayout.GlyphCoverage do
   @spec get_gids([value], boolean()) :: [integer()] when value: integer() | binary()
   defp get_gids(glyphs, internal?)
   defp get_gids(glyphs, true), do: glyphs
-  defp get_gids(glyphs, false), do: Enum.map(glyphs, &GlyphStorage.get(&1).gid)
+  defp get_gids(glyphs, false), do: Enum.map(glyphs, &gid!(&1))
 
   @spec chunk_glyph_idx([integer()]) :: [[integer()]]
   defp chunk_glyph_idx(glyph_idx) do

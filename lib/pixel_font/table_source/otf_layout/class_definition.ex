@@ -1,5 +1,6 @@
 defmodule PixelFont.TableSource.OTFLayout.ClassDefinition do
-  alias PixelFont.GlyphStorage
+  require PixelFont.Util, as: Util
+  import Util, only: :macros
 
   defstruct ~w(assignments)a
 
@@ -14,9 +15,7 @@ defmodule PixelFont.TableSource.OTFLayout.ClassDefinition do
     assignments =
       class_def.assignments
       |> Enum.map(fn {class, ids} ->
-        ids
-        |> Enum.map(&GlyphStorage.get(&1).gid)
-        |> Enum.map(&{&1, class})
+        ids |> Enum.map(&gid!(&1)) |> Enum.map(&{&1, class})
       end)
       |> List.flatten()
       |> Enum.sort_by(&elem(&1, 0))

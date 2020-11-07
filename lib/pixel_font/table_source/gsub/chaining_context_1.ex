@@ -5,11 +5,11 @@ defmodule PixelFont.TableSource.GSUB.ChainingContext1 do
   @typep glyph_id :: integer() | binary()
 
   defimpl PixelFont.TableSource.GSUB.Subtable do
-    alias PixelFont.GlyphStorage
+    require PixelFont.Util, as: Util
+    import Util, only: :macros
     alias PixelFont.TableSource.GSUB
     alias PixelFont.TableSource.GSUB.ChainingContext1
     alias PixelFont.TableSource.OTFLayout.GlyphCoverage
-    alias PixelFont.Util
 
     @spec compile(ChainingContext1.t(), keyword()) :: binary()
     def compile(subtable, opts) do
@@ -18,9 +18,7 @@ defmodule PixelFont.TableSource.GSUB.ChainingContext1 do
 
       {glyphs, subrulesets} =
         subtable.subrulesets
-        |> Enum.map(fn {key, value} ->
-          {GlyphStorage.get(key).gid, value}
-        end)
+        |> Enum.map(fn {key, value} -> {gid!(key), value} end)
         |> Enum.sort(&(elem(&1, 0) <= elem(&2, 0)))
         |> Enum.unzip()
 
@@ -69,11 +67,11 @@ defmodule PixelFont.TableSource.GSUB.ChainingContext1 do
 
         [
           <<length(subrule.backtrack)::16>>,
-          Enum.map(subrule.backtrack, &<<GlyphStorage.get(&1).gid::16>>),
+          Enum.map(subrule.backtrack, &<<gid!(&1)::16>>),
           <<length(subrule.input) + 1::16>>,
-          Enum.map(subrule.input, &<<GlyphStorage.get(&1).gid::16>>),
+          Enum.map(subrule.input, &<<gid!(&1)::16>>),
           <<length(subrule.lookahead)::16>>,
-          Enum.map(subrule.lookahead, &<<GlyphStorage.get(&1).gid::16>>),
+          Enum.map(subrule.lookahead, &<<gid!(&1)::16>>),
           <<length(sub_records)::16>>,
           sub_records
         ]

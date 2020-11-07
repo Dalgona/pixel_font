@@ -6,15 +6,16 @@ defmodule PixelFont.TableSource.GSUB.Single1 do
   @type t :: %__MODULE__{glyphs: GlyphCoverage.t(), to: integer() | binary()}
 
   defimpl PixelFont.TableSource.GSUB.Subtable do
-    alias PixelFont.GlyphStorage
+    require PixelFont.Util, as: Util
+    import Util, only: :macros
     alias PixelFont.TableSource.GSUB.Single1
     alias PixelFont.TableSource.OTFLayout.GlyphCoverage
 
     @spec compile(Single1.t(), keyword()) :: binary()
     def compile(subtable, _opts) do
-      to_index = GlyphStorage.get(subtable.to).gid
+      to_index = gid!(subtable.to)
       compiled_coverage = GlyphCoverage.compile(subtable.glyphs)
-      first_id = GlyphStorage.get(hd(subtable.glyphs.glyphs)).gid
+      first_id = gid!(hd(subtable.glyphs.glyphs))
 
       IO.iodata_to_binary([
         # substFormat

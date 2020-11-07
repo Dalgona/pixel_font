@@ -5,10 +5,10 @@ defmodule PixelFont.TableSource.GSUB.Ligature1 do
   @typep glyph_id :: integer() | binary()
 
   defimpl PixelFont.TableSource.GSUB.Subtable do
-    alias PixelFont.GlyphStorage
+    require PixelFont.Util, as: Util
+    import Util, only: :macros
     alias PixelFont.TableSource.GSUB.Ligature1
     alias PixelFont.TableSource.OTFLayout.GlyphCoverage
-    alias PixelFont.Util
 
     @typep glyph_id :: integer() | binary()
 
@@ -48,8 +48,8 @@ defmodule PixelFont.TableSource.GSUB.Ligature1 do
     @spec map_indices([{[glyph_id()], glyph_id()}]) :: [{[integer()], integer()}]
     defp map_indices(substitutions) do
       Enum.map(substitutions, fn {components, lig_glyph} ->
-        component_indices = Enum.map(components, &GlyphStorage.get(&1).gid)
-        lig_index = GlyphStorage.get(lig_glyph).gid
+        component_indices = Enum.map(components, &gid!(&1))
+        lig_index = gid!(lig_glyph)
 
         {component_indices, lig_index}
       end)

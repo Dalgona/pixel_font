@@ -29,6 +29,9 @@ defmodule PixelFont.Util do
     end
   end
 
+  @spec gid!(Macro.t()) :: Macro.t()
+  defmacro gid!(id), do: quote(do: PixelFont.GlyphStorage.get(unquote(id)).gid)
+
   @spec offsetted_binaries(list(), integer(), (term() -> iodata())) ::
           {integer(), [binary()], [binary()]}
   def offsetted_binaries(sources, offset_base, fun) do

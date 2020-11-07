@@ -1,4 +1,6 @@
 defmodule PixelFont.TableSource.Cmap do
+  require PixelFont.Util, as: Util
+  import Util, only: :macros
   alias PixelFont.CompiledTable
   alias PixelFont.GlyphStorage
   alias PixelFont.TableSource.Name.Definitions, as: Defs
@@ -42,7 +44,7 @@ defmodule PixelFont.TableSource.Cmap do
 
   defp cmap_data(ranges) do
     {start_codes, end_codes} = ranges |> Enum.map(&{&1.first, &1.last}) |> Enum.unzip()
-    id_deltas = Enum.map(start_codes, &(GlyphStorage.get(&1).gid - &1))
+    id_deltas = Enum.map(start_codes, &(gid!(&1) - &1))
 
     [
       Enum.map(end_codes, &<<&1::16>>),
