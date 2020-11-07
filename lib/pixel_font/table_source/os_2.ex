@@ -1,6 +1,8 @@
 defmodule PixelFont.TableSource.OS_2 do
   alias PixelFont.CompiledTable
   alias PixelFont.Font.Metrics
+  alias PixelFont.Glyph
+  alias PixelFont.Glyph.{BitmapData, CompositeData}
   alias PixelFont.GlyphStorage
   alias PixelFont.TableSource.OS_2.Enums
   alias PixelFont.TableSource.OS_2.UnicodeRanges
@@ -45,7 +47,7 @@ defmodule PixelFont.TableSource.OS_2 do
 
   def compile(%__MODULE__{} = params, %Metrics{} = metrics, 4) do
     all_glyphs = GlyphStorage.all()
-    unicode_glyphs = Enum.filter(all_glyphs, &(&1.type === :unicode))
+    unicode_glyphs = Enum.filter(all_glyphs, &is_integer(&1.id))
     avg_char_width = calculate_avg_char_width(all_glyphs, params)
 
     {first_char, last_char} =
@@ -114,12 +116,12 @@ defmodule PixelFont.TableSource.OS_2 do
 
     glyphs
     |> Enum.map(fn
-      %{advance: advance} ->
+      %Glyph{data: %BitmapData{advance: advance}} ->
         advance
 
-      %{components: components} ->
+      %Glyph{data: %CompositeData{components: components}} ->
         components
-        |> Enum.map(& &1.glyph.advance)
+        |> Enum.map(& &1.glyph.data.advance)
         |> Enum.max(fn -> 0 end)
     end)
     |> Enum.sum()

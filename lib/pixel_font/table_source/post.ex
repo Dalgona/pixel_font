@@ -1,6 +1,7 @@
 defmodule PixelFont.TableSource.Post do
   alias PixelFont.CompiledTable
   alias PixelFont.Font.Metrics
+  alias PixelFont.Glyph
   alias PixelFont.GlyphStorage
   alias PixelFont.TableSource.Post.AGLFN
 
@@ -14,12 +15,12 @@ defmodule PixelFont.TableSource.Post do
     {name_data, indexes} =
       all_glyphs
       |> Enum.map(fn
-        %{type: :name, id: id} ->
-          id
+        %Glyph{id: name} when is_binary(name) ->
+          name
 
-        %{type: :unicode, id: id} ->
-          case aglfn[id] do
-            nil -> "uni#{id |> Integer.to_string(16) |> String.pad_leading(4, "0")}"
+        %Glyph{id: code} when is_integer(code) ->
+          case aglfn[code] do
+            nil -> "uni#{code |> Integer.to_string(16) |> String.pad_leading(4, "0")}"
             name when is_binary(name) -> name
           end
       end)

@@ -42,11 +42,7 @@ defmodule PixelFont.TableSource.Cmap do
 
   defp cmap_data(ranges) do
     {start_codes, end_codes} = ranges |> Enum.map(&{&1.first, &1.last}) |> Enum.unzip()
-
-    id_deltas =
-      Enum.map(start_codes, fn code ->
-        GlyphStorage.get({:unicode, code}).index - code
-      end)
+    id_deltas = Enum.map(start_codes, &(GlyphStorage.get(&1).gid - &1))
 
     [
       Enum.map(end_codes, &<<&1::16>>),
@@ -64,7 +60,7 @@ defmodule PixelFont.TableSource.Cmap do
 
     [c | cs] =
       all_glyphs
-      |> Enum.filter(&(&1.type === :unicode))
+      |> Enum.filter(&is_integer(&1.id))
       |> Enum.map(& &1.id)
       |> Enum.sort()
 

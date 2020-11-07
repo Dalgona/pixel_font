@@ -1,5 +1,7 @@
 defmodule PixelFont.TableSource.Maxp do
   alias PixelFont.CompiledTable
+  alias PixelFont.Glyph
+  alias PixelFont.Glyph.{BitmapData, CompositeData}
   alias PixelFont.GlyphStorage
 
   defstruct [
@@ -33,18 +35,18 @@ defmodule PixelFont.TableSource.Maxp do
 
     {num_simple_points, num_simple_contours} =
       simple_glyphs
-      |> Enum.map(fn %{contours: contours} ->
+      |> Enum.map(fn %Glyph{data: %BitmapData{contours: contours}} ->
         {contours |> List.flatten() |> length(), length(contours)}
       end)
       |> Enum.unzip()
 
-    only_components = Enum.map(composite_glyphs, & &1.components)
+    only_components = Enum.map(composite_glyphs, & &1.data.components)
 
     {num_composite_points, num_composite_contours} =
       only_components
       |> Enum.map(&Enum.map(&1, fn component -> component.glyph end))
       |> Enum.map(fn ref_glyphs ->
-        all_contours = Enum.map(ref_glyphs, & &1.contours)
+        all_contours = Enum.map(ref_glyphs, & &1.data.contours)
 
         num_composite_points =
           all_contours
@@ -76,10 +78,10 @@ defmodule PixelFont.TableSource.Maxp do
     }
   end
 
-  @spec get_glyph_type(map()) :: :simple | :composite
+  @spec get_glyph_type(Glyph.t()) :: :simple | :composite
   defp get_glyph_type(glyph)
-  defp get_glyph_type(%{contours: _}), do: :simple
-  defp get_glyph_type(%{components: _}), do: :composite
+  defp get_glyph_type(%Glyph{data: %BitmapData{}}), do: :simple
+  defp get_glyph_type(%Glyph{data: %CompositeData{}}), do: :composite
 
   @spec compile(t()) :: CompiledTable.t()
   def compile(maxp) do
