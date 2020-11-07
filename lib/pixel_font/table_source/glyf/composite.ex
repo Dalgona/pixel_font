@@ -1,9 +1,12 @@
 defmodule PixelFont.TableSource.Glyf.Composite do
+  alias PixelFont.Glyph
+  alias PixelFont.Glyph.CompositeData
+
   defstruct ~w(components)a
 
   @type t :: %__MODULE__{components: [[binary]]}
 
-  @spec new([map()]) :: t()
+  @spec new([CompositeData.glyph_component()]) :: t()
   def new(components) do
     %__MODULE__{components: make_data(components, [])}
   end
@@ -19,7 +22,7 @@ defmodule PixelFont.TableSource.Glyf.Composite do
   end
 
   defp do_make_data(component, more) do
-    %{glyph: %{index: index}, x_offset: xoff, y_offset: yoff, flags: flags} = component
+    %{glyph: %Glyph{gid: gid}, x_offset: xoff, y_offset: yoff, flags: flags} = component
 
     [
       # flags
@@ -54,7 +57,7 @@ defmodule PixelFont.TableSource.Glyf.Composite do
         0::1
       >>,
       # glyph index
-      <<index::big-16>>,
+      <<gid::big-16>>,
       # args
       <<xoff::big-8, yoff::big-8>>
     ]

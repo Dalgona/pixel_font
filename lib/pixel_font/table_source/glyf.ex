@@ -9,19 +9,7 @@ defmodule PixelFont.TableSource.Glyf do
 
   @spec generate() :: t()
   def generate do
-    glyphs = GlyphStorage.all()
-
-    items =
-      glyphs
-      |> Enum.map(fn
-        %{contours: _} = simple_glyph ->
-          Item.new_simple(simple_glyph)
-
-        %{components: _} = composite_glyph ->
-          Item.new_composite(composite_glyph)
-      end)
-
-    %__MODULE__{items: items}
+    %__MODULE__{items: Enum.map(GlyphStorage.all(), &Item.new/1)}
   end
 
   @spec compile(t()) :: [CompiledTable.t()]

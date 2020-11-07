@@ -1,4 +1,6 @@
 defmodule PixelFont.TableSource.Glyf.Item do
+  alias PixelFont.Glyph
+  alias PixelFont.Glyph.{BitmapData, CompositeData}
   alias PixelFont.TableSource.Glyf.Simple
   alias PixelFont.TableSource.Glyf.Composite
 
@@ -13,24 +15,26 @@ defmodule PixelFont.TableSource.Glyf.Item do
           description: Simple.t() | Composite.t()
         }
 
-  @spec new_simple(map()) :: t()
-  def new_simple(glyph) do
+  @spec new(Glyph.t()) :: t()
+  def new(glyph)
+
+  def new(%Glyph{data: %BitmapData{} = data}) do
     %__MODULE__{
-      num_of_contours: length(glyph.contours),
-      xmin: glyph.xmin,
-      ymin: glyph.ymin,
-      xmax: glyph.xmax,
-      ymax: glyph.ymax,
-      description: Simple.new(glyph.contours)
+      num_of_contours: length(data.contours),
+      xmin: data.xmin,
+      ymin: data.ymin,
+      xmax: data.xmax,
+      ymax: data.ymax,
+      description: Simple.new(data.contours)
     }
   end
 
-  @spec new_composite(map()) :: t()
-  def new_composite(glyph) do
+  @spec new(Glyph.t()) :: t()
+  def new(%Glyph{data: %CompositeData{} = data}) do
     boundaries =
-      glyph.components
-      |> Enum.map(fn %{glyph: ref_glyph, x_offset: xoff, y_offset: yoff} ->
-        %{xmin: xmin, ymin: ymin, xmax: xmax, ymax: ymax} = ref_glyph
+      data.components
+      |> Enum.map(fn %{glyph: %Glyph{} = ref_glyph, x_offset: xoff, y_offset: yoff} ->
+        %BitmapData{xmin: xmin, ymin: ymin, xmax: xmax, ymax: ymax} = ref_glyph.data
 
         {xmin + xoff, ymin + yoff, xmax + xoff, ymax + yoff}
       end)
@@ -43,7 +47,7 @@ defmodule PixelFont.TableSource.Glyf.Item do
       ymin: boundaries |> Enum.map(&elem(&1, 1)) |> Enum.min(zero),
       xmax: boundaries |> Enum.map(&elem(&1, 2)) |> Enum.max(zero),
       ymax: boundaries |> Enum.map(&elem(&1, 3)) |> Enum.max(zero),
-      description: Composite.new(glyph.components)
+      description: Composite.new(data.components)
     }
   end
 
