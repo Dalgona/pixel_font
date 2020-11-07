@@ -1,4 +1,7 @@
 defmodule PixelFont.TableSource.Hmtx.Record do
+  alias PixelFont.Glyph
+  alias PixelFont.Glyph.{BitmapData, CompositeData}
+
   defstruct ~w(advance lsb xmin xmax glyph_empty?)a
 
   @type t :: %__MODULE__{
@@ -9,34 +12,34 @@ defmodule PixelFont.TableSource.Hmtx.Record do
           glyph_empty?: boolean()
         }
 
-  @spec new(map()) :: t()
+  @spec new(Glyph.t()) :: t()
   def new(glyph)
 
-  def new(%{contours: contours} = simple_glyph) do
+  def new(%Glyph{data: %BitmapData{} = data}) do
     %__MODULE__{
-      advance: simple_glyph.advance,
-      lsb: simple_glyph.xmin,
-      xmin: simple_glyph.xmin,
-      xmax: simple_glyph.xmax,
-      glyph_empty?: Enum.empty?(contours)
+      advance: data.advance,
+      lsb: data.xmin,
+      xmin: data.xmin,
+      xmax: data.xmax,
+      glyph_empty?: Enum.empty?(data.contours)
     }
   end
 
-  def new(%{components: components}) do
-    case Enum.find(components, &(:use_my_metrics in &1.flags)) do
-      nil -> calculate_metrics_from_components(components)
+  def new(%Glyph{data: %CompositeData{} = data}) do
+    case Enum.find(data.components, &(:use_my_metrics in &1.flags)) do
+      nil -> calculate_metrics_from_components(data.components)
       %{glyph: glyph} -> new(glyph)
     end
   end
 
-  @spec calculate_metrics_from_components([map()]) :: t()
+  @spec calculate_metrics_from_components([CompositeData.glyph_component()]) :: t()
   defp calculate_metrics_from_components(components) do
     metrics =
-      Enum.map(components, fn %{glyph: glyph, x_offset: xoff} ->
+      Enum.map(components, fn %{glyph: %Glyph{data: %BitmapData{} = data}, x_offset: xoff} ->
         %{
-          advance: glyph.advance + xoff,
-          xmin: glyph.xmin + xoff,
-          xmax: glyph.xmax + xoff
+          advance: data.advance + xoff,
+          xmin: data.xmin + xoff,
+          xmax: data.xmax + xoff
         }
       end)
 

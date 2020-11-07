@@ -10,9 +10,7 @@ defmodule PixelFont.TableSource.Hmtx do
 
   @spec generate() :: t()
   def generate do
-    glyphs = GlyphStorage.all()
-
-    %__MODULE__{records: Enum.map(glyphs, &Record.new/1)}
+    %__MODULE__{records: Enum.map(GlyphStorage.all(), &Record.new/1)}
   end
 
   @spec compile(t(), Metrics.t()) :: [CompiledTable.t()]
