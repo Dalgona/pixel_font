@@ -9,13 +9,12 @@ defmodule PixelFont.TableSource.GSUB.Single1 do
     alias PixelFont.GlyphStorage
     alias PixelFont.TableSource.GSUB.Single1
     alias PixelFont.TableSource.OTFLayout.GlyphCoverage
-    alias PixelFont.Util
 
     @spec compile(Single1.t(), keyword()) :: binary()
     def compile(subtable, _opts) do
-      to_index = GlyphStorage.get(Util.get_glyph_id(subtable.to)).index
+      to_index = GlyphStorage.get(subtable.to).gid
       compiled_coverage = GlyphCoverage.compile(subtable.glyphs)
-      first_id = GlyphStorage.get(Util.get_glyph_id(hd(subtable.glyphs.glyphs))).index
+      first_id = GlyphStorage.get(hd(subtable.glyphs.glyphs)).gid
 
       IO.iodata_to_binary([
         # substFormat

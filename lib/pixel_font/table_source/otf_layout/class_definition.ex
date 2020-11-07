@@ -1,6 +1,5 @@
 defmodule PixelFont.TableSource.OTFLayout.ClassDefinition do
   alias PixelFont.GlyphStorage
-  alias PixelFont.Util
 
   defstruct ~w(assignments)a
 
@@ -16,7 +15,7 @@ defmodule PixelFont.TableSource.OTFLayout.ClassDefinition do
       class_def.assignments
       |> Enum.map(fn {class, ids} ->
         ids
-        |> Enum.map(&GlyphStorage.get(Util.get_glyph_id(&1)).index)
+        |> Enum.map(&GlyphStorage.get(&1).gid)
         |> Enum.map(&{&1, class})
       end)
       |> List.flatten()

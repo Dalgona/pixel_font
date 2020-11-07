@@ -23,11 +23,7 @@ defmodule PixelFont.TableSource.OTFLayout.GlyphCoverage do
 
   @spec compile(t(), keyword()) :: binary()
   def compile(%__MODULE__{glyphs: glyphs}, opts \\ []) do
-    glyph_idx =
-      glyphs
-      |> get_glyph_ids(opts[:internal] || false)
-      |> Enum.sort()
-
+    glyph_idx = glyphs |> get_gids(opts[:internal] || false) |> Enum.sort()
     chunked_glyph_idx = chunk_glyph_idx(glyph_idx)
     fmt1_words = 2 + length(glyph_idx)
     fmt2_words = 2 + 3 * length(chunked_glyph_idx)
@@ -57,15 +53,10 @@ defmodule PixelFont.TableSource.OTFLayout.GlyphCoverage do
     {Enum.reverse(offsets), Enum.reverse(coverages)}
   end
 
-  @spec get_glyph_ids([value], boolean()) :: [integer()] when value: integer() | binary()
-  defp get_glyph_ids(glyphs, internal?)
-  defp get_glyph_ids(glyphs, true), do: glyphs
-
-  defp get_glyph_ids(glyphs, false) do
-    glyphs
-    |> Enum.map(&Util.get_glyph_id/1)
-    |> Enum.map(&GlyphStorage.get(&1).index)
-  end
+  @spec get_gids([value], boolean()) :: [integer()] when value: integer() | binary()
+  defp get_gids(glyphs, internal?)
+  defp get_gids(glyphs, true), do: glyphs
+  defp get_gids(glyphs, false), do: Enum.map(glyphs, &GlyphStorage.get(&1).gid)
 
   @spec chunk_glyph_idx([integer()]) :: [[integer()]]
   defp chunk_glyph_idx(glyph_idx) do

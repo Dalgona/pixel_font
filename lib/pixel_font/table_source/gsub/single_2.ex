@@ -8,17 +8,13 @@ defmodule PixelFont.TableSource.GSUB.Single2 do
     alias PixelFont.GlyphStorage
     alias PixelFont.TableSource.OTFLayout.GlyphCoverage
     alias PixelFont.TableSource.GSUB.Single2
-    alias PixelFont.Util
 
     @spec compile(Single2.t(), keyword()) :: binary()
     def compile(subtable, _opts) do
       {from_glyphs, to_glyphs} =
         subtable.substitutions
         |> Enum.map(fn {from, to} ->
-          from_id = Util.get_glyph_id(from)
-          to_id = Util.get_glyph_id(to)
-
-          {GlyphStorage.get(from_id).index, GlyphStorage.get(to_id).index}
+          {GlyphStorage.get(from).gid, GlyphStorage.get(to).gid}
         end)
         |> Enum.sort(&(elem(&1, 0) <= elem(&2, 0)))
         |> Enum.unzip()

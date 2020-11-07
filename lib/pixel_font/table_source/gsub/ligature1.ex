@@ -48,12 +48,8 @@ defmodule PixelFont.TableSource.GSUB.Ligature1 do
     @spec map_indices([{[glyph_id()], glyph_id()}]) :: [{[integer()], integer()}]
     defp map_indices(substitutions) do
       Enum.map(substitutions, fn {components, lig_glyph} ->
-        component_indices =
-          Enum.map(components, fn id ->
-            GlyphStorage.get(Util.get_glyph_id(id)).index
-          end)
-
-        lig_index = GlyphStorage.get(Util.get_glyph_id(lig_glyph)).index
+        component_indices = Enum.map(components, &GlyphStorage.get(&1).gid)
+        lig_index = GlyphStorage.get(lig_glyph).gid
 
         {component_indices, lig_index}
       end)

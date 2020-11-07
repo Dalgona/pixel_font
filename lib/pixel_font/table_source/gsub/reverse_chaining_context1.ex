@@ -14,17 +14,13 @@ defmodule PixelFont.TableSource.GSUB.ReverseChainingContext1 do
   defimpl PixelFont.TableSource.GSUB.Subtable do
     alias PixelFont.GlyphStorage
     alias PixelFont.TableSource.GSUB.ReverseChainingContext1
-    alias PixelFont.Util
 
     @spec compile(ReverseChainingContext1.t(), keyword()) :: binary()
     def compile(subtable, _opts) do
       {from_glyphs, to_glyphs} =
         subtable.substitutions
         |> Enum.map(fn {from, to} ->
-          from_id = Util.get_glyph_id(from)
-          to_id = Util.get_glyph_id(to)
-
-          {GlyphStorage.get(from_id).index, GlyphStorage.get(to_id).index}
+          {GlyphStorage.get(from).gid, GlyphStorage.get(to).gid}
         end)
         |> Enum.sort(&(elem(&1, 0) <= elem(&2, 0)))
         |> Enum.unzip()

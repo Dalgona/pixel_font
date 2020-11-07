@@ -19,7 +19,7 @@ defmodule PixelFont.TableSource.GSUB.ChainingContext1 do
       {glyphs, subrulesets} =
         subtable.subrulesets
         |> Enum.map(fn {key, value} ->
-          {GlyphStorage.get(Util.get_glyph_id(key)).index, value}
+          {GlyphStorage.get(key).gid, value}
         end)
         |> Enum.sort(&(elem(&1, 0) <= elem(&2, 0)))
         |> Enum.unzip()
@@ -69,11 +69,11 @@ defmodule PixelFont.TableSource.GSUB.ChainingContext1 do
 
         [
           <<length(subrule.backtrack)::16>>,
-          Enum.map(subrule.backtrack, &<<GlyphStorage.get(Util.get_glyph_id(&1)).index::16>>),
+          Enum.map(subrule.backtrack, &<<GlyphStorage.get(&1).gid::16>>),
           <<length(subrule.input) + 1::16>>,
-          Enum.map(subrule.input, &<<GlyphStorage.get(Util.get_glyph_id(&1)).index::16>>),
+          Enum.map(subrule.input, &<<GlyphStorage.get(&1).gid::16>>),
           <<length(subrule.lookahead)::16>>,
-          Enum.map(subrule.lookahead, &<<GlyphStorage.get(Util.get_glyph_id(&1)).index::16>>),
+          Enum.map(subrule.lookahead, &<<GlyphStorage.get(&1).gid::16>>),
           <<length(sub_records)::16>>,
           sub_records
         ]
