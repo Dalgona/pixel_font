@@ -1,6 +1,7 @@
 defmodule PixelFont.GlyphSource do
   require PixelFont.RectilinearShape, as: RectilinearShape
   require PixelFont.RectilinearShape.Path, as: Path
+  import PixelFont.DSL.MacroHelper
   alias PixelFont.Glyph
   alias PixelFont.Glyph.{BitmapData, CompositeData}
 
@@ -147,8 +148,4 @@ defmodule PixelFont.GlyphSource do
       }
     end
   end
-
-  defp get_exprs(do_block)
-  defp get_exprs({:__block__, _, exprs}), do: exprs
-  defp get_exprs(expr), do: [expr]
 end

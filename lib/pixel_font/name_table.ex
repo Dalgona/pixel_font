@@ -1,5 +1,6 @@
 defmodule PixelFont.NameTable do
   require PixelFont.TableSource.Name.Definitions, as: Defs
+  import PixelFont.DSL.MacroHelper
 
   @spec __using__(keyword()) :: Macro.t()
   defmacro __using__(_options) do
@@ -79,8 +80,4 @@ defmodule PixelFont.NameTable do
       import unquote(__MODULE__), only: [name_records: 2]
     end
   end
-
-  defp get_exprs(do_block)
-  defp get_exprs({:__block__, _, exprs}), do: exprs
-  defp get_exprs(expr), do: [expr]
 end
