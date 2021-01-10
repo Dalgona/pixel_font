@@ -23,20 +23,20 @@ defmodule PixelFont.GlyphSource do
         unquote(exprs)
         |> List.flatten()
         |> unquote(__MODULE__).__make_contours__()
-        |> Map.new()
       end
       |> handle_based_on(options[:based_on])
 
     quote do
       defmodule unquote(name) do
-        # TODO: limit macros to be imported
-        import unquote(__MODULE__)
+        import unquote(__MODULE__), only: [bmp_glyph: 2, composite_glyph: 2]
 
         @glyph_map unquote(map_expr)
         @glyph_list @glyph_map |> Map.values() |> Enum.sort(&(&1.id <= &2.id))
 
         def __glyph_map__, do: @glyph_map
         def glyphs, do: @glyph_list
+
+        IO.puts("#{inspect(__MODULE__)}: Exported #{length(@glyph_list)} glyphs.")
       end
     end
   end
@@ -58,19 +58,23 @@ defmodule PixelFont.GlyphSource do
   end
 
   defmacro bmp_glyph(id, do: block) do
-    {
-      id,
-      quote do
-        %Glyph{
-          id: unquote(id),
-          data:
-            struct!(
-              BitmapData,
-              [{:contours, []} | List.flatten(unquote(get_exprs(block)))]
-            )
+    quote do
+      fn ->
+        import unquote(__MODULE__), only: [advance: 1, bounds: 2, data: 1]
+
+        {
+          unquote(id),
+          %Glyph{
+            id: unquote(id),
+            data:
+              struct!(
+                BitmapData,
+                [{:contours, []} | List.flatten(unquote(get_exprs(block)))]
+              )
+          }
         }
       end
-    }
+    end
   end
 
   Enum.each(~w(advance data)a, fn key ->
@@ -88,6 +92,7 @@ defmodule PixelFont.GlyphSource do
 
   def __make_contours__(glyphs) do
     glyphs
+    |> Stream.map(& &1.())
     |> Task.async_stream(fn
       {id, %Glyph{data: %BitmapData{} = data} = glyph} ->
         contours =
@@ -102,21 +107,25 @@ defmodule PixelFont.GlyphSource do
       {id, %Glyph{} = glyph} ->
         {id, glyph}
     end)
-    |> Enum.map(&elem(&1, 1))
+    |> Map.new(&elem(&1, 1))
   end
 
   defmacro composite_glyph(id, do: block) do
-    {
-      id,
-      quote do
-        %Glyph{
-          id: unquote(id),
-          data: %CompositeData{
-            components: Enum.reject(unquote(get_exprs(block)), &is_nil/1)
+    quote do
+      fn ->
+        import unquote(__MODULE__), only: [component: 3, component: 4]
+
+        {
+          unquote(id),
+          %Glyph{
+            id: unquote(id),
+            data: %CompositeData{
+              components: Enum.reject(unquote(get_exprs(block)), &is_nil/1)
+            }
           }
         }
       end
-    }
+    end
   end
 
   defmacro component(glyph_id, x_off, y_off) do
