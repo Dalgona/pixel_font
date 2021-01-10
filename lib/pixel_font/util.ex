@@ -30,7 +30,16 @@ defmodule PixelFont.Util do
   end
 
   @spec gid!(Macro.t()) :: Macro.t()
-  defmacro gid!(id), do: quote(do: PixelFont.GlyphStorage.get(unquote(id)).gid)
+  defmacro gid!(id) do
+    quote bind_quoted: [id: id] do
+      id
+      |> PixelFont.GlyphStorage.get()
+      |> case do
+        nil -> raise "GID for #{inspect(id)} not found"
+        glyph -> glyph.gid
+      end
+    end
+  end
 
   @spec offsetted_binaries(list(), integer(), (term() -> iodata())) ::
           {integer(), [binary()], [binary()]}
