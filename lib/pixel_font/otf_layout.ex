@@ -12,6 +12,8 @@ defmodule PixelFont.OTFLayout do
   @spec lookups(module(), [for: <<_::32>>], do: Macro.t()) :: Macro.t()
   defmacro lookups(name, [for: type], do: do_block) when type in ~w(GPOS GSUB) do
     import_module = Module.concat(PixelFont.DSL.OTFLayout.Lookups, type)
+    exprs = get_exprs(do_block)
+    {module_block, exprs} = handle_module(exprs, __CALLER__)
 
     quote do
       defmodule unquote(name) do
@@ -21,11 +23,13 @@ defmodule PixelFont.OTFLayout do
         alias PixelFont.TableSource.OTFLayout.Lookup
         alias PixelFont.TableSource.OTFLayout.LookupList
 
+        unquote(module_block)
+
         @spec lookups() :: [LookupList.t()]
         def lookups do
           %LookupList{
             lookups:
-              unquote(get_exprs(do_block))
+              unquote(exprs)
               |> List.flatten()
               |> Enum.reject(&is_nil/1)
               |> Enum.map(& &1.())
