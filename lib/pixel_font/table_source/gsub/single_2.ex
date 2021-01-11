@@ -5,8 +5,6 @@ defmodule PixelFont.TableSource.GSUB.Single2 do
   @typep glyph_id :: integer() | binary()
 
   defimpl PixelFont.TableSource.GSUB.Subtable do
-    require PixelFont.Util, as: Util
-    import Util, only: :macros
     alias PixelFont.TableSource.OTFLayout.GlyphCoverage
     alias PixelFont.TableSource.GSUB.Single2
 
@@ -14,7 +12,6 @@ defmodule PixelFont.TableSource.GSUB.Single2 do
     def compile(subtable, _opts) do
       {from_glyphs, to_glyphs} =
         subtable.substitutions
-        |> Enum.map(fn {from, to} -> {gid!(from), gid!(to)} end)
         |> Enum.sort(&(elem(&1, 0) <= elem(&2, 0)))
         |> Enum.unzip()
 
