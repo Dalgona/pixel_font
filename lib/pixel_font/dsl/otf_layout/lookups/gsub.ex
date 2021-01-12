@@ -21,7 +21,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
 
   defmacro single_substitution(name, do: do_block) do
     quote do
-      fn ->
+      if true do
         import unquote(__MODULE__), only: [substitutions: 1]
 
         %Lookup{
@@ -32,7 +32,6 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
             unquote(get_exprs(do_block))
             |> List.flatten()
             |> Enum.reject(&is_nil/1)
-            |> Enum.map(& &1.())
         }
       end
     end
@@ -40,7 +39,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
 
   defmacro substitutions(do: do_block) do
     quote do
-      fn ->
+      if true do
         import unquote(__MODULE__), only: [substitute: 2]
 
         unquote(__MODULE__).__make_single_subtable__(unquote(get_exprs(do_block)))

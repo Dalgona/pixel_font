@@ -32,7 +32,6 @@ defmodule PixelFont.OTFLayout do
               unquote(exprs)
               |> List.flatten()
               |> Enum.reject(&is_nil/1)
-              |> Enum.map(& &1.())
           }
         end
       end

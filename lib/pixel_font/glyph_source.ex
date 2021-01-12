@@ -60,7 +60,7 @@ defmodule PixelFont.GlyphSource do
 
   defmacro bmp_glyph(id, do: block) do
     quote do
-      fn ->
+      if true do
         import unquote(__MODULE__), only: [advance: 1, bounds: 2, data: 1]
 
         {
@@ -93,7 +93,6 @@ defmodule PixelFont.GlyphSource do
 
   def __make_contours__(glyphs) do
     glyphs
-    |> Stream.map(& &1.())
     |> Task.async_stream(fn
       {id, %Glyph{data: %BitmapData{} = data} = glyph} ->
         contours =
@@ -113,7 +112,7 @@ defmodule PixelFont.GlyphSource do
 
   defmacro composite_glyph(id, do: block) do
     quote do
-      fn ->
+      if true do
         import unquote(__MODULE__), only: [component: 3, component: 4]
 
         {
