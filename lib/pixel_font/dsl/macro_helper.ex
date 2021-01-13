@@ -2,10 +2,28 @@ defmodule PixelFont.DSL.MacroHelper do
   @moduledoc false
 
   @doc false
+  @spec block_direct_invocation!(Macro.Env.t()) :: no_return()
+  def block_direct_invocation!(env) do
+    raise CompileError,
+      file: env.file,
+      line: env.line,
+      description: "this macro cannot be called directly"
+  end
+
+  @doc false
   @spec get_exprs(Macro.t()) :: [Macro.t()]
   def get_exprs(do_block)
   def get_exprs({:__block__, _, exprs}), do: exprs
   def get_exprs(expr), do: [expr]
+
+  @doc false
+  @spec replace_call(Macro.t(), atom(), arity(), atom()) :: Macro.t()
+  def replace_call(ast, from_name, arity, to_name) do
+    Macro.prewalk(ast, fn
+      {^from_name, meta, args} when length(args) === arity -> {to_name, meta, args}
+      expr -> expr
+    end)
+  end
 
   @doc false
   @spec handle_module(Macro.t(), Macro.Env.t()) :: {Macro.t(), [Macro.t()]}
