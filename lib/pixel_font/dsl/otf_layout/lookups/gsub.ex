@@ -6,6 +6,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
   import PixelFont.Util
   alias PixelFont.Glyph
   alias PixelFont.TableSource.GSUB
+  alias PixelFont.TableSource.GSUB.ChainingContext1
   alias PixelFont.TableSource.GSUB.ChainingContext3
   alias PixelFont.TableSource.GSUB.Single1
   alias PixelFont.TableSource.GSUB.Single2
@@ -54,6 +55,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
             unquote(exprs)
             |> List.flatten()
             |> Enum.reject(&is_nil/1)
+            |> unquote(__MODULE__).__try_convert_chain_format__()
         }
       end
     end
@@ -143,4 +145,47 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
         |> Enum.map(fn {{_cov, lookup}, index} -> {index, lookup} end)
     }
   end
+
+  @doc false
+  @spec __try_convert_chain_format__([ChainingContext3.t()]) ::
+          [ChainingContext1.t() | ChainingContext3.t()]
+  def __try_convert_chain_format__(subtables) do
+    if Enum.all?(subtables, &simple_context?/1) do
+      [convert_to_format_1(subtables)]
+    else
+      subtables
+    end
+  end
+
+  @spec simple_context?(ChainingContext3.t()) :: boolean()
+  defp simple_context?(subtable) do
+    ~w(backtrack input lookahead)a
+    |> Enum.map(&Map.get(subtable, &1))
+    |> Enum.all?(&singleton_sequence?/1)
+  end
+
+  @spec singleton_sequence?([GlyphCoverage.t()]) :: boolean()
+  defp singleton_sequence?(seq), do: Enum.all?(seq, &singleton_coverage?/1)
+
+  @spec singleton_coverage?(GlyphCoverage.t()) :: boolean()
+  defp singleton_coverage?(coverage), do: length(coverage.glyphs) === 1
+
+  @spec convert_to_format_1([ChainingContext3.t()]) :: ChainingContext1.t()
+  defp convert_to_format_1(subtables) do
+    subrulesets =
+      subtables
+      |> Enum.group_by(&hd(hd(&1.input).glyphs), fn subtable ->
+        %{
+          backtrack: flatten_sequence(subtable.backtrack),
+          input: flatten_sequence(tl(subtable.input)),
+          lookahead: flatten_sequence(subtable.lookahead),
+          substitutions: subtable.substitutions
+        }
+      end)
+
+    %ChainingContext1{subrulesets: subrulesets}
+  end
+
+  @spec flatten_sequence([GlyphCoverage.t()]) :: [Glyph.id()]
+  defp flatten_sequence(sequence), do: Enum.map(sequence, &hd(&1.glyphs))
 end
