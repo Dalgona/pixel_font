@@ -8,17 +8,23 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
   alias PixelFont.TableSource.GSUB
   alias PixelFont.TableSource.GSUB.ChainingContext1
   alias PixelFont.TableSource.GSUB.ChainingContext3
+  alias PixelFont.TableSource.GSUB.ReverseChainingContext1
   alias PixelFont.TableSource.GSUB.Single1
   alias PixelFont.TableSource.GSUB.Single2
   alias PixelFont.TableSource.OTFLayout.GlyphCoverage
   alias PixelFont.TableSource.OTFLayout.Lookup
+
+  @typep sub_record :: {Glyph.id(), Glyph.id()}
+  @typep sequence :: {seq_type(), [Glyph.id()], term()}
+  @typep seq_type :: :backtrack | :input | :lookahead
 
   @doc false
   @spec __import_items__() :: [{atom(), arity()}]
   def __import_items__ do
     [
       single_substitution: 2,
-      chained_context: 2
+      chained_context: 2,
+      reverse_chaining_context: 2
     ]
   end
 
@@ -61,6 +67,26 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
     end
   end
 
+  defmacro reverse_chaining_context(name, do: do_block) do
+    exprs = do_block |> get_exprs() |> replace_call(:context, 1, :context__8)
+
+    quote do
+      if true do
+        import unquote(__MODULE__), only: [context__8: 1]
+
+        %Lookup{
+          owner: GSUB,
+          type: 8,
+          name: unquote(name),
+          subtables:
+            unquote(exprs)
+            |> List.flatten()
+            |> Enum.reject(&is_nil/1)
+        }
+      end
+    end
+  end
+
   defmacro substitutions(do: do_block) do
     quote do
       if true do
@@ -86,6 +112,16 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
     end
   end
 
+  defmacro context__8(do: do_block) do
+    quote do
+      if true do
+        import unquote(__MODULE__), only: [backtrack: 1, lookahead: 1, substitute: 2]
+
+        unquote(__MODULE__).__make_reverse_chaining_ctx_subtable__(unquote(get_exprs(do_block)))
+      end
+    end
+  end
+
   @spec backtrack(Macro.t()) :: Macro.t()
   defmacro backtrack(glyphs), do: quote(do: {:backtrack, unquote(glyphs), nil})
 
@@ -99,7 +135,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
   defmacro lookahead(glyphs), do: quote(do: {:lookahead, unquote(glyphs), nil})
 
   @doc false
-  @spec __make_single_subtable__([{Glyph.id(), Glyph.id()}]) :: Single1.t() | Single2.t()
+  @spec __make_single_subtable__([sub_record()]) :: Single1.t() | Single2.t()
   def __make_single_subtable__(substitutions) do
     subst_gids =
       substitutions
@@ -123,7 +159,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
   end
 
   @doc false
-  @spec __make_chained_ctx_subtable__([{atom(), Glyph.id(), term()}]) :: ChainingContext3.t()
+  @spec __make_chained_ctx_subtable__([sequence()]) :: ChainingContext3.t()
   def __make_chained_ctx_subtable__(context) do
     seq_group =
       context
@@ -188,4 +224,28 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
 
   @spec flatten_sequence([GlyphCoverage.t()]) :: [Glyph.id()]
   defp flatten_sequence(sequence), do: Enum.map(sequence, &hd(&1.glyphs))
+
+  @spec __make_reverse_chaining_ctx_subtable__([sequence() | sub_record()]) ::
+          ReverseChainingContext1.t()
+  def __make_reverse_chaining_ctx_subtable__(context) do
+    {context, substitutions} =
+      Enum.reduce(context, {[], []}, fn
+        {_, _} = sub, {context, subs} -> {context, [sub | subs]}
+        {_, _, _} = seq, {context, subs} -> {[seq | context], subs}
+      end)
+
+    seq_group =
+      context
+      |> Enum.reverse()
+      |> Enum.map(fn {type, glyphs, lookup} ->
+        {type, GlyphCoverage.of(glyphs), lookup}
+      end)
+      |> Enum.group_by(&elem(&1, 0), &Tuple.delete_at(&1, 0))
+
+    %ReverseChainingContext1{
+      backtrack: Enum.map(seq_group[:backtrack] || [], &elem(&1, 0)),
+      lookahead: Enum.map(seq_group[:lookahead] || [], &elem(&1, 0)),
+      substitutions: Enum.reverse(substitutions)
+    }
+  end
 end
