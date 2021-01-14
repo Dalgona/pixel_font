@@ -18,17 +18,17 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
   @typep sequence :: {seq_type(), [Glyph.id()], term()}
   @typep seq_type :: :backtrack | :input | :lookahead
 
-  @doc false
-  @spec __import_items__() :: [{atom(), arity()}]
-  def __import_items__ do
-    [
-      single_substitution: 2,
-      chained_context: 2,
-      reverse_chaining_context: 2
-    ]
+  @spec lookup(atom(), Macro.t(), do: Macro.t()) :: Macro.t()
+  defmacro lookup(type, name, do: do_block) do
+    exprs = get_exprs(do_block)
+
+    handle_lookup(type, name, exprs)
   end
 
-  defmacro single_substitution(name, do: do_block) do
+  @spec handle_lookup(atom(), Macro.t(), [Macro.t()]) :: Macro.t()
+  defp handle_lookup(type, name, exprs)
+
+  defp handle_lookup(:single_substitution, name, exprs) do
     quote do
       if true do
         import unquote(__MODULE__), only: [substitutions: 1]
@@ -38,7 +38,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
           type: 1,
           name: unquote(name),
           subtables:
-            unquote(get_exprs(do_block))
+            unquote(exprs)
             |> List.flatten()
             |> Enum.reject(&is_nil/1)
         }
@@ -46,8 +46,8 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
     end
   end
 
-  defmacro chained_context(name, do: do_block) do
-    exprs = do_block |> get_exprs() |> replace_call(:context, 1, :context__6)
+  defp handle_lookup(:chained_context, name, exprs) do
+    exprs = replace_call(exprs, :context, 1, :context__6)
 
     quote do
       if true do
@@ -67,8 +67,8 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
     end
   end
 
-  defmacro reverse_chaining_context(name, do: do_block) do
-    exprs = do_block |> get_exprs() |> replace_call(:context, 1, :context__8)
+  defp handle_lookup(:reverse_chaining_context, name, exprs) do
+    exprs = replace_call(exprs, :context, 1, :context__8)
 
     quote do
       if true do

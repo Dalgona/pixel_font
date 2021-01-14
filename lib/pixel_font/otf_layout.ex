@@ -19,7 +19,7 @@ defmodule PixelFont.OTFLayout do
       defmodule unquote(name) do
         require unquote(import_module)
         import unquote(__MODULE__), only: []
-        import unquote(import_module), only: unquote(import_module.__import_items__())
+        import unquote(import_module), only: [lookup: 3]
         alias PixelFont.TableSource.OTFLayout.Lookup
         alias PixelFont.TableSource.OTFLayout.LookupList
 
