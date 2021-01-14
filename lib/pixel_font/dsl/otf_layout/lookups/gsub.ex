@@ -20,15 +20,30 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
 
   @spec lookup(atom(), Macro.t(), do: Macro.t()) :: Macro.t()
   defmacro lookup(type, name, do: do_block) do
-    exprs = get_exprs(do_block)
+    expr_groups =
+      do_block
+      |> get_exprs()
+      |> Enum.group_by(fn
+        {:feature, _, [_, _]} -> :features
+        _ -> :others
+      end)
 
-    handle_lookup(type, name, exprs)
+    features =
+      expr_groups[:features]
+      |> List.wrap()
+      |> Enum.map(fn {:feature, _, [tag, scripts]} -> {tag, scripts} end)
+
+    feature_expr = {:%{}, [], features}
+
+    handle_lookup(type, name, feature_expr, expr_groups[:others] || [])
   end
 
-  @spec handle_lookup(atom(), Macro.t(), [Macro.t()]) :: Macro.t()
-  defp handle_lookup(type, name, exprs)
+  defmacro feature(_tag, _scripts), do: block_direct_invocation!(__CALLER__)
 
-  defp handle_lookup(:single_substitution, name, exprs) do
+  @spec handle_lookup(atom(), Macro.t(), Macro.t(), [Macro.t()]) :: Macro.t()
+  defp handle_lookup(type, name, features_expr, exprs)
+
+  defp handle_lookup(:single_substitution, name, features_expr, exprs) do
     quote do
       if true do
         import unquote(__MODULE__), only: [substitutions: 1]
@@ -40,13 +55,14 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
           subtables:
             unquote(exprs)
             |> List.flatten()
-            |> Enum.reject(&is_nil/1)
+            |> Enum.reject(&is_nil/1),
+          features: unquote(features_expr)
         }
       end
     end
   end
 
-  defp handle_lookup(:chained_context, name, exprs) do
+  defp handle_lookup(:chained_context, name, features_expr, exprs) do
     exprs = replace_call(exprs, :context, 1, :context__6)
 
     quote do
@@ -61,13 +77,14 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
             unquote(exprs)
             |> List.flatten()
             |> Enum.reject(&is_nil/1)
-            |> unquote(__MODULE__).__try_convert_chain_format__()
+            |> unquote(__MODULE__).__try_convert_chain_format__(),
+          features: unquote(features_expr)
         }
       end
     end
   end
 
-  defp handle_lookup(:reverse_chaining_context, name, exprs) do
+  defp handle_lookup(:reverse_chaining_context, name, features_expr, exprs) do
     exprs = replace_call(exprs, :context, 1, :context__8)
 
     quote do
@@ -81,7 +98,8 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
           subtables:
             unquote(exprs)
             |> List.flatten()
-            |> Enum.reject(&is_nil/1)
+            |> Enum.reject(&is_nil/1),
+          features: unquote(features_expr)
         }
       end
     end
