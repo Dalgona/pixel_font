@@ -29,6 +29,11 @@ defmodule PixelFont.Util do
     end
   end
 
+  @spec elem!(Macro.t(), [Macro.t()]) :: Macro.t()
+  defmacro elem!(tuple, indices) when is_list(indices) do
+    Enum.reduce(indices, tuple, &quote(do: elem(unquote(&2), unquote(&1))))
+  end
+
   @spec gid!(Macro.t()) :: Macro.t()
   defmacro gid!(id) do
     quote bind_quoted: [id: id] do
