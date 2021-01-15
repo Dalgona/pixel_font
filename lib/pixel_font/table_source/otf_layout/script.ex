@@ -4,10 +4,12 @@ defmodule PixelFont.TableSource.OTFLayout.Script do
   defstruct ~w(tag default_language languages)a
 
   @type t :: %__MODULE__{
-          tag: <<_::32>>,
+          tag: tag(),
           default_language: LanguageSystem.t() | nil,
           languages: [LanguageSystem.t()]
         }
+
+  @type tag :: <<_::32>>
 
   @spec compile(t(), keyword()) :: binary()
   def compile(%{languages: langs} = script, opts) do

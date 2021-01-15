@@ -1,25 +1,24 @@
 defmodule PixelFont.TableSource.OTFLayout.Lookup do
   alias PixelFont.Util
+  alias PixelFont.TableSource.OTFLayout.{Feature, LanguageSystem, Script}
 
   defstruct ~w(owner type name subtables features)a
 
   @type t :: %__MODULE__{
           owner: module(),
           type: integer(),
-          name: term(),
+          name: id(),
           subtables: [map()],
           features: features()
         }
 
+  @type id :: term()
+
   @type features :: %{
-          optional(feature_tag()) => %{
-            optional(script_tag()) => [:default | language_tag()]
+          optional(Feature.tag()) => %{
+            optional(Script.tag()) => [:default | LanguageSystem.tag()]
           }
         }
-
-  @type feature_tag :: <<_::32>>
-  @type script_tag :: <<_::32>>
-  @type language_tag :: <<_::32>>
 
   @spec compile(t(), keyword()) :: binary()
   def compile(%{subtables: subtables} = lookup, opts) do

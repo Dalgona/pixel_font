@@ -1,17 +1,17 @@
 defmodule PixelFont.TableSource.OTFLayout.LanguageSystem do
-  defstruct [
-    :tag,
-    :required_feature,
-    :features
-  ]
+  alias PixelFont.TableSource.OTFLayout.Feature
 
-  @type feature_key :: {<<_::32>>, term()}
+  defstruct ~w(tag required_feature features)a
+
+  @type feature_key :: {Feature.tag(), Feature.id()}
 
   @type t :: %__MODULE__{
-          tag: <<_::32>>,
+          tag: tag(),
           required_feature: feature_key() | nil,
           features: [feature_key()]
         }
+
+  @type tag :: <<_::32>>
 
   @spec compile(t(), keyword()) :: binary()
   def compile(lang, opts) do

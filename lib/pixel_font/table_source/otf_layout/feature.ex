@@ -1,13 +1,11 @@
 defmodule PixelFont.TableSource.OTFLayout.Feature do
+  alias PixelFont.TableSource.OTFLayout.Lookup
+
   defstruct ~w(tag name lookups)a
 
-  @type lookup_key :: term()
-
-  @type t :: %__MODULE__{
-          tag: <<_::32>>,
-          name: term(),
-          lookups: [lookup_key()]
-        }
+  @type t :: %__MODULE__{tag: tag(), name: id(), lookups: [Lookup.id()]}
+  @type tag :: <<_::32>>
+  @type id :: term()
 
   @spec compile(t(), keyword()) :: binary()
   def compile(%{lookups: lookups}, opts) do
