@@ -55,7 +55,7 @@ defmodule PixelFont.TableSource.GPOSGSUB do
   defp populate_indices(%struct{} = table) when struct in [GPOS, GSUB] do
     %{
       table
-      | feature_indices: index_map(table.feature_list.features, &{&1.tag, &1.name}),
+      | feature_indices: index_map(table.feature_list.features, & &1.name),
         lookup_indices: index_map(table.lookup_list.lookups, & &1.name)
     }
   end
