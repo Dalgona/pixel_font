@@ -20,6 +20,11 @@ defmodule PixelFont.TableSource.GSUB do
           lookup_indices: GPOSGSUB.lookup_indices()
         }
 
+  @spec from_lookups([module()]) :: t()
+  def from_lookups(lookup_modules) do
+    struct!(__MODULE__, GPOSGSUB.__from_lookups__(lookup_modules))
+  end
+
   @spec compile(t()) :: CompiledTable.t()
   defdelegate compile(gsub), to: GPOSGSUB
 
