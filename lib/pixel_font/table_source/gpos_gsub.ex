@@ -7,7 +7,7 @@ defmodule PixelFont.TableSource.GPOSGSUB do
   alias PixelFont.Util
 
   @type t :: GPOS.t() | GSUB.t()
-  @type feature_indices :: %{optional({<<_::4>>, term()}) => integer()}
+  @type feature_indices :: %{optional(Feature.id()) => integer()}
   @type lookup_indices :: %{optional(binary()) => integer()}
 
   @spec compile(t()) :: CompiledTable.t()

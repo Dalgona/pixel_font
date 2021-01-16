@@ -38,6 +38,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
     handle_lookup(type, name, feature_expr, expr_groups[:others] || [])
   end
 
+  @spec feature(Macro.t(), Macro.t()) :: no_return()
   defmacro feature(_tag, _scripts), do: block_direct_invocation!(__CALLER__)
 
   @spec handle_lookup(atom(), Macro.t(), Macro.t(), [Macro.t()]) :: Macro.t()
@@ -118,6 +119,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
   @spec substitute(Macro.t(), Macro.t()) :: Macro.t()
   defmacro substitute(from_id, to_id), do: {from_id, to_id}
 
+  @spec context(Macro.t()) :: no_return()
   defmacro context(_), do: block_direct_invocation!(__CALLER__)
 
   defmacro context__6(do: do_block) do

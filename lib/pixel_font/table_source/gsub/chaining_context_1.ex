@@ -7,7 +7,7 @@ defmodule PixelFont.TableSource.GSUB.ChainingContext1 do
   defimpl PixelFont.TableSource.GSUB.Subtable do
     require PixelFont.Util, as: Util
     import Util, only: :macros
-    alias PixelFont.TableSource.GSUB
+    alias PixelFont.TableSource.GPOSGSUB
     alias PixelFont.TableSource.GSUB.ChainingContext1
     alias PixelFont.TableSource.OTFLayout.GlyphCoverage
 
@@ -43,7 +43,7 @@ defmodule PixelFont.TableSource.GSUB.ChainingContext1 do
       ])
     end
 
-    @spec compile_subrulesets([map()], integer(), GSUB.lookup_indices()) ::
+    @spec compile_subrulesets([map()], integer(), GPOSGSUB.lookup_indices()) ::
             {integer(), [binary()], [binary()]}
     defp compile_subrulesets(subrulesets, offset_base, lookup_indices) do
       Util.offsetted_binaries(subrulesets, offset_base, fn subrules ->
@@ -56,7 +56,7 @@ defmodule PixelFont.TableSource.GSUB.ChainingContext1 do
       end)
     end
 
-    @spec compile_subrules([map()], integer(), GSUB.lookup_indices()) ::
+    @spec compile_subrules([map()], integer(), GPOSGSUB.lookup_indices()) ::
             {integer(), [binary()], [binary()]}
     defp compile_subrules(subrules, offset_base, lookup_indices) do
       Util.offsetted_binaries(subrules, offset_base, fn subrule ->
