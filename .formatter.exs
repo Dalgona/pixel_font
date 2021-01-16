@@ -34,7 +34,15 @@
       typographic_subfamily: 1,
       sample_text: 1,
       postscript_cid_findfont_name: 1,
-      font_specific_name: 2
+      font_specific_name: 2,
+
+      # From the OTF Layout DSL (PixelFont.OTFLayout)
+      feature: 2,
+      substitute: 2,
+      backtrack: 1,
+      input: 1,
+      input: 2,
+      lookahead: 1
     ]
   ]
 ]
