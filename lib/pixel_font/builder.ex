@@ -19,7 +19,7 @@ defmodule PixelFont.Builder do
       Post.compile(font.metrics, 2),
       OS_2.compile(font.os_2, font.metrics, 4),
       GPOS.compile(font.gpos),
-      GSUB.compile(font.gsub)
+      font.gsub_lookups |> GSUB.from_lookups() |> GSUB.compile()
     ]
 
     :ok = GenServer.stop(GlyphStorage)
