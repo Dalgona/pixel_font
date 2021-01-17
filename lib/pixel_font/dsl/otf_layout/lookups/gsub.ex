@@ -144,6 +144,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
     end
   end
 
+  # TODO: remove duplicate codes
   @spec backtrack(Macro.t()) :: Macro.t()
   defmacro backtrack(glyphs), do: quote(do: {:backtrack, unquote(glyphs), nil})
 
@@ -180,6 +181,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
     end
   end
 
+  # TODO: remove duplicate codes
   @doc false
   @spec __make_chained_ctx_subtable__([sequence()]) :: ChainingContext3.t()
   def __make_chained_ctx_subtable__(context) do
