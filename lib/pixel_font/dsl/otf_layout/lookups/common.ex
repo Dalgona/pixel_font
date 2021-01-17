@@ -55,4 +55,16 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.Common do
 
   @spec feature(Macro.t(), Macro.t()) :: no_return()
   defmacro feature(_tag, _scripts), do: block_direct_invocation!(__CALLER__)
+
+  @spec backtrack(Macro.t()) :: Macro.t()
+  defmacro backtrack(glyphs), do: quote(do: {:backtrack, unquote(glyphs), nil})
+
+  @spec input(Macro.t()) :: Macro.t()
+  @spec input(Macro.t(), keyword()) :: Macro.t()
+  defmacro input(glyphs, options \\ []) do
+    quote do: {:input, unquote(glyphs), unquote(options)[:apply]}
+  end
+
+  @spec lookahead(Macro.t()) :: Macro.t()
+  defmacro lookahead(glyphs), do: quote(do: {:lookahead, unquote(glyphs), nil})
 end

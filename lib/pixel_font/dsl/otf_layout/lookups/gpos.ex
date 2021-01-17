@@ -51,25 +51,12 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GPOS do
   defmacro context__8(do: do_block) do
     quote do
       if true do
-        import unquote(__MODULE__), only: [backtrack: 1, input: 1, input: 2, lookahead: 1]
+        import Common, only: [backtrack: 1, input: 1, input: 2, lookahead: 1]
 
         unquote(__MODULE__).__make_chained_ctx_subtable__(unquote(get_exprs(do_block)))
       end
     end
   end
-
-  # TODO: remove duplicate codes
-  @spec backtrack(Macro.t()) :: Macro.t()
-  defmacro backtrack(glyphs), do: quote(do: {:backtrack, unquote(glyphs), nil})
-
-  @spec input(Macro.t()) :: Macro.t()
-  @spec input(Macro.t(), keyword()) :: Macro.t()
-  defmacro input(glyphs, options \\ []) do
-    quote do: {:input, unquote(glyphs), unquote(options)[:apply]}
-  end
-
-  @spec lookahead(Macro.t()) :: Macro.t()
-  defmacro lookahead(glyphs), do: quote(do: {:lookahead, unquote(glyphs), nil})
 
   @doc false
   @spec __make_single_1_subtable__(GlyphCoverage.source(), keyword()) :: SingleAdjustment1.t()
