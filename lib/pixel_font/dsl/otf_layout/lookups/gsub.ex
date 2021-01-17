@@ -18,6 +18,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
   @typep sequence :: {seq_type(), [Glyph.id()], term()}
   @typep seq_type :: :backtrack | :input | :lookahead
 
+  # TODO: remove duplicate codes
   @spec lookup(atom(), Macro.t(), do: Macro.t()) :: Macro.t()
   defmacro lookup(type, name, do: do_block) do
     expr_groups =
@@ -38,6 +39,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
     handle_lookup(type, name, feature_expr, expr_groups[:others] || [])
   end
 
+  # TODO: remove duplicate codes
   @spec feature(Macro.t(), Macro.t()) :: no_return()
   defmacro feature(_tag, _scripts), do: block_direct_invocation!(__CALLER__)
 
