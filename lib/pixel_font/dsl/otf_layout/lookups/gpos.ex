@@ -2,71 +2,25 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GPOS do
   @moduledoc false
 
   import PixelFont.DSL.MacroHelper
+  alias PixelFont.DSL.OTFLayout.Lookups.Common
   alias PixelFont.TableSource.GPOS
   alias PixelFont.TableSource.GPOS.ChainingContext3
   alias PixelFont.TableSource.GPOS.SingleAdjustment1
   alias PixelFont.TableSource.GPOS.ValueRecord
   alias PixelFont.TableSource.OTFLayout.GlyphCoverage
-  alias PixelFont.TableSource.OTFLayout.Lookup
 
   @typep sequence :: {seq_type(), [Glyph.id()], term()}
   @typep seq_type :: :backtrack | :input | :lookahead
 
-  # TODO: remove duplicate codes
   @spec lookup(atom(), Macro.t(), do: Macro.t()) :: Macro.t()
   defmacro lookup(type, name, do: do_block) do
-    expr_groups =
-      do_block
-      |> get_exprs()
-      |> Enum.group_by(fn
-        {:feature, _, [_, _]} -> :features
-        _ -> :others
-      end)
-
-    features =
-      expr_groups[:features]
-      |> List.wrap()
-      |> Enum.map(fn {:feature, _, [tag, scripts]} -> {tag, scripts} end)
-
-    lookup_attrs = handle_lookup(type)
-    exprs = lookup_attrs.ast_transform.(expr_groups[:others] || [])
-    features_expr = {:%{}, [], features}
-
-    subtables_expr =
-      quote do
-        unquote(exprs)
-        |> List.flatten()
-        |> Enum.reject(&is_nil/1)
-      end
-
-    quote do
-      if true do
-        import unquote(__MODULE__), only: unquote(lookup_attrs.imports)
-
-        %Lookup{
-          owner: GPOS,
-          type: unquote(lookup_attrs.type),
-          name: unquote(name),
-          subtables: unquote(lookup_attrs.runtime_transform.(subtables_expr)),
-          features: unquote(features_expr)
-        }
-      end
-    end
+    Common.__lookup__(__MODULE__, GPOS, type, name, do_block)
   end
 
-  # TODO: remove duplicate codes
-  @spec feature(Macro.t(), Macro.t()) :: no_return()
-  defmacro feature(_tag, _scripts), do: block_direct_invocation!(__CALLER__)
+  @spec __handle_lookup__(atom()) :: Common.lookup_attrs()
+  def __handle_lookup__(type)
 
-  @spec handle_lookup(atom()) :: %{
-          imports: [{atom(), arity()}],
-          type: integer(),
-          ast_transform: (Macro.t() -> Macro.t()),
-          runtime_transform: (Macro.t() -> Macro.t())
-        }
-  defp handle_lookup(type)
-
-  defp handle_lookup(:single_adjustment) do
+  def __handle_lookup__(:single_adjustment) do
     %{
       imports: [adjust_uniform: 2],
       type: 1,
@@ -75,7 +29,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GPOS do
     }
   end
 
-  defp handle_lookup(:chained_context) do
+  def __handle_lookup__(:chained_context) do
     %{
       imports: [context__8: 1],
       type: 8,
