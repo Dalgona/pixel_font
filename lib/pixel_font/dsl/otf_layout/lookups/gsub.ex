@@ -34,78 +34,73 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
       |> List.wrap()
       |> Enum.map(fn {:feature, _, [tag, scripts]} -> {tag, scripts} end)
 
-    feature_expr = {:%{}, [], features}
+    lookup_attrs = handle_lookup(type)
+    exprs = lookup_attrs.ast_transform.(expr_groups[:others] || [])
+    features_expr = {:%{}, [], features}
 
-    handle_lookup(type, name, feature_expr, expr_groups[:others] || [])
+    subtables_expr =
+      quote do
+        unquote(exprs)
+        |> List.flatten()
+        |> Enum.reject(&is_nil/1)
+      end
+
+    quote do
+      if true do
+        import unquote(__MODULE__), only: unquote(lookup_attrs.imports)
+
+        %Lookup{
+          owner: GSUB,
+          type: unquote(lookup_attrs.type),
+          name: unquote(name),
+          subtables: unquote(lookup_attrs.runtime_transform.(subtables_expr)),
+          features: unquote(features_expr)
+        }
+      end
+    end
   end
 
   # TODO: remove duplicate codes
   @spec feature(Macro.t(), Macro.t()) :: no_return()
   defmacro feature(_tag, _scripts), do: block_direct_invocation!(__CALLER__)
 
-  @spec handle_lookup(atom(), Macro.t(), Macro.t(), [Macro.t()]) :: Macro.t()
-  defp handle_lookup(type, name, features_expr, exprs)
-
-  defp handle_lookup(:single_substitution, name, features_expr, exprs) do
-    quote do
-      if true do
-        import unquote(__MODULE__), only: [substitutions: 1]
-
-        %Lookup{
-          owner: GSUB,
-          type: 1,
-          name: unquote(name),
-          subtables:
-            unquote(exprs)
-            |> List.flatten()
-            |> Enum.reject(&is_nil/1),
-          features: unquote(features_expr)
+  @spec handle_lookup(atom()) :: %{
+          imports: [{atom(), arity()}],
+          type: integer(),
+          ast_transform: (Macro.t() -> Macro.t()),
+          runtime_transform: (Macro.t() -> Macro.t())
         }
-      end
-    end
+  defp handle_lookup(type)
+
+  defp handle_lookup(:single_substitution) do
+    %{
+      imports: [substitutions: 1],
+      type: 1,
+      ast_transform: & &1,
+      runtime_transform: & &1
+    }
   end
 
-  defp handle_lookup(:chained_context, name, features_expr, exprs) do
-    exprs = replace_call(exprs, :context, 1, :context__6)
-
-    quote do
-      if true do
-        import unquote(__MODULE__), only: [context__6: 1]
-
-        %Lookup{
-          owner: GSUB,
-          type: 6,
-          name: unquote(name),
-          subtables:
-            unquote(exprs)
-            |> List.flatten()
-            |> Enum.reject(&is_nil/1)
-            |> unquote(__MODULE__).__try_convert_chain_format__(),
-          features: unquote(features_expr)
-        }
+  defp handle_lookup(:chained_context) do
+    %{
+      imports: [context__6: 1],
+      type: 6,
+      ast_transform: &replace_call(&1, :context, 1, :context__6),
+      runtime_transform: fn expr ->
+        quote do
+          unquote(__MODULE__).__try_convert_chain_format__(unquote(expr))
+        end
       end
-    end
+    }
   end
 
-  defp handle_lookup(:reverse_chaining_context, name, features_expr, exprs) do
-    exprs = replace_call(exprs, :context, 1, :context__8)
-
-    quote do
-      if true do
-        import unquote(__MODULE__), only: [context__8: 1]
-
-        %Lookup{
-          owner: GSUB,
-          type: 8,
-          name: unquote(name),
-          subtables:
-            unquote(exprs)
-            |> List.flatten()
-            |> Enum.reject(&is_nil/1),
-          features: unquote(features_expr)
-        }
-      end
-    end
+  defp handle_lookup(:reverse_chaining_context) do
+    %{
+      imports: [context__8: 1],
+      type: 8,
+      ast_transform: &replace_call(&1, :context, 1, :context__8),
+      runtime_transform: & &1
+    }
   end
 
   defmacro substitutions(do: do_block) do

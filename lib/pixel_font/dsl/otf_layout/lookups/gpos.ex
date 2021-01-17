@@ -28,56 +28,60 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GPOS do
       |> List.wrap()
       |> Enum.map(fn {:feature, _, [tag, scripts]} -> {tag, scripts} end)
 
-    feature_expr = {:%{}, [], features}
+    lookup_attrs = handle_lookup(type)
+    exprs = lookup_attrs.ast_transform.(expr_groups[:others] || [])
+    features_expr = {:%{}, [], features}
 
-    handle_lookup(type, name, feature_expr, expr_groups[:others] || [])
+    subtables_expr =
+      quote do
+        unquote(exprs)
+        |> List.flatten()
+        |> Enum.reject(&is_nil/1)
+      end
+
+    quote do
+      if true do
+        import unquote(__MODULE__), only: unquote(lookup_attrs.imports)
+
+        %Lookup{
+          owner: GPOS,
+          type: unquote(lookup_attrs.type),
+          name: unquote(name),
+          subtables: unquote(lookup_attrs.runtime_transform.(subtables_expr)),
+          features: unquote(features_expr)
+        }
+      end
+    end
   end
 
   # TODO: remove duplicate codes
   @spec feature(Macro.t(), Macro.t()) :: no_return()
   defmacro feature(_tag, _scripts), do: block_direct_invocation!(__CALLER__)
 
-  @spec handle_lookup(atom(), Macro.t(), Macro.t(), [Macro.t()]) :: Macro.t()
-  defp handle_lookup(type, name, features_expr, exprs)
-
-  defp handle_lookup(:single_adjustment, name, features_expr, exprs) do
-    quote do
-      if true do
-        import unquote(__MODULE__), only: [adjust_uniform: 2]
-
-        %Lookup{
-          owner: GPOS,
-          type: 1,
-          name: unquote(name),
-          subtables:
-            unquote(exprs)
-            |> List.flatten()
-            |> Enum.reject(&is_nil/1),
-          features: unquote(features_expr)
+  @spec handle_lookup(atom()) :: %{
+          imports: [{atom(), arity()}],
+          type: integer(),
+          ast_transform: (Macro.t() -> Macro.t()),
+          runtime_transform: (Macro.t() -> Macro.t())
         }
-      end
-    end
+  defp handle_lookup(type)
+
+  defp handle_lookup(:single_adjustment) do
+    %{
+      imports: [adjust_uniform: 2],
+      type: 1,
+      ast_transform: & &1,
+      runtime_transform: & &1
+    }
   end
 
-  defp handle_lookup(:chained_context, name, features_expr, exprs) do
-    exprs = replace_call(exprs, :context, 1, :context__8)
-
-    quote do
-      if true do
-        import unquote(__MODULE__), only: [context__8: 1]
-
-        %Lookup{
-          owner: GPOS,
-          type: 8,
-          name: unquote(name),
-          subtables:
-            unquote(exprs)
-            |> List.flatten()
-            |> Enum.reject(&is_nil/1),
-          features: unquote(features_expr)
-        }
-      end
-    end
+  defp handle_lookup(:chained_context) do
+    %{
+      imports: [context__8: 1],
+      type: 8,
+      ast_transform: &replace_call(&1, :context, 1, :context__8),
+      runtime_transform: & &1
+    }
   end
 
   @spec adjust_uniform(Macro.t(), keyword()) :: Macro.t()
