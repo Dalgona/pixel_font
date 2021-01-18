@@ -18,7 +18,7 @@ defmodule PixelFont.Builder do
       Cmap.compile(),
       Post.compile(font.metrics, 2),
       OS_2.compile(font.os_2, font.metrics, 4),
-      GPOS.compile(font.gpos),
+      font.gpos_lookups |> GPOS.from_lookups() |> GPOS.compile(),
       font.gsub_lookups |> GSUB.from_lookups() |> GSUB.compile()
     ]
 

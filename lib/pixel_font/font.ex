@@ -1,6 +1,6 @@
 defmodule PixelFont.Font do
   alias PixelFont.Font.Metrics
-  alias PixelFont.TableSource.{GPOS, OS_2}
+  alias PixelFont.TableSource.OS_2
 
   defstruct version: Version.parse!("0.0.0"),
             name_table: [],
@@ -8,7 +8,7 @@ defmodule PixelFont.Font do
             os_2: %OS_2{},
             glyph_sources: [],
             notdef_glyph: nil,
-            gpos: %GPOS{},
+            gpos_lookups: [],
             gsub_lookups: []
 
   @type t :: %__MODULE__{
@@ -18,7 +18,7 @@ defmodule PixelFont.Font do
           os_2: OS_2.t(),
           glyph_sources: [module()],
           notdef_glyph: module() | nil,
-          gpos: GPOS.t(),
+          gpos_lookups: [module()],
           gsub_lookups: [module()]
         }
 end
