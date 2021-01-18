@@ -38,6 +38,7 @@
 
       # From the OTF Layout DSL (PixelFont.OTFLayout)
       feature: 2,
+      adjust_uniform: 2,
       substitute: 2,
       backtrack: 1,
       input: 1,
