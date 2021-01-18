@@ -15,8 +15,6 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
   alias PixelFont.TableSource.OTFLayout.GlyphCoverage
 
   @typep sub_record :: {Glyph.id(), Glyph.id()}
-  @typep sequence :: {seq_type(), [Glyph.id()], term()}
-  @typep seq_type :: :backtrack | :input | :lookahead
 
   @spec lookup(atom(), Macro.t(), do: Macro.t()) :: Macro.t()
   defmacro lookup(type, name, do: do_block) do
@@ -78,7 +76,11 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
       if true do
         import Common, only: [backtrack: 1, input: 1, input: 2, lookahead: 1]
 
-        unquote(__MODULE__).__make_chained_ctx_subtable__(unquote(get_exprs(do_block)))
+        Common.__make_chained_ctx_subtable__(
+          unquote(get_exprs(do_block)),
+          ChainingContext3,
+          :substitutions
+        )
       end
     end
   end
@@ -116,31 +118,6 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
       [_ | _] ->
         %Single2{substitutions: subst_gids}
     end
-  end
-
-  # TODO: remove duplicate codes
-  @doc false
-  @spec __make_chained_ctx_subtable__([sequence()]) :: ChainingContext3.t()
-  def __make_chained_ctx_subtable__(context) do
-    seq_group =
-      context
-      |> Enum.map(fn {type, glyphs, lookup} ->
-        {type, GlyphCoverage.of(glyphs), lookup}
-      end)
-      |> Enum.group_by(&elem(&1, 0), &Tuple.delete_at(&1, 0))
-
-    input_seq = seq_group[:input] || []
-
-    %ChainingContext3{
-      backtrack: Enum.map(seq_group[:backtrack] || [], &elem(&1, 0)),
-      input: Enum.map(input_seq, &elem(&1, 0)),
-      lookahead: Enum.map(seq_group[:lookahead] || [], &elem(&1, 0)),
-      substitutions:
-        input_seq
-        |> Enum.with_index()
-        |> Enum.reject(fn {{_cov, lookup}, _idx} -> is_nil(lookup) end)
-        |> Enum.map(fn {{_cov, lookup}, index} -> {index, lookup} end)
-    }
   end
 
   @doc false
@@ -186,7 +163,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
   @spec flatten_sequence([GlyphCoverage.t()]) :: [Glyph.id()]
   defp flatten_sequence(sequence), do: Enum.map(sequence, &hd(&1.glyphs))
 
-  @spec __make_reverse_chaining_ctx_subtable__([sequence() | sub_record()]) ::
+  @spec __make_reverse_chaining_ctx_subtable__([Common.sequence() | sub_record()]) ::
           ReverseChainingContext1.t()
   def __make_reverse_chaining_ctx_subtable__(context) do
     {context, substitutions} =
