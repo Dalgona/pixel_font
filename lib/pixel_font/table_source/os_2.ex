@@ -10,6 +10,8 @@ defmodule PixelFont.TableSource.OS_2 do
   defstruct avg_char_width: :auto,
             weight_class: :normal,
             width_class: :normal,
+            embedding: :installable,
+            allow_subsetting?: true,
             subscript_size: {0, 0},
             subscript_offset: {0, 0},
             superscript_size: {0, 0},
@@ -26,6 +28,8 @@ defmodule PixelFont.TableSource.OS_2 do
           avg_char_width: non_neg_integer() | :auto,
           weight_class: Enums.weight_class(),
           width_class: Enums.width_class(),
+          embedding: embedding(),
+          allow_subsetting?: boolean(),
           subscript_size: size(),
           subscript_offset: offset(),
           superscript_size: size(),
@@ -39,6 +43,7 @@ defmodule PixelFont.TableSource.OS_2 do
           cap_height: non_neg_integer()
         }
 
+  @type embedding :: :installable | :restricted | :preview_and_print | :editable
   @type size :: {non_neg_integer(), non_neg_integer()}
   @type offset :: {integer(), integer()}
 
@@ -62,7 +67,18 @@ defmodule PixelFont.TableSource.OS_2 do
       <<Enums.weight_class(params.weight_class)::16>>,
       <<Enums.width_class(params.width_class)::16>>,
       # fsType
-      <<0::4, 0::2, 0::1, 0::1, 0::4, 0::4>>,
+      <<
+        # (Reserved)
+        0::6,
+        # Bitmap Embedding Only
+        0::1,
+        # No Subsetting
+        if(params.allow_subsetting?, do: 0, else: 1)::1,
+        # (Reserved)
+        0::4,
+        # Usage Permissions
+        convert_embedding(params.embedding)::4
+      >>,
       <<elem(params.subscript_size, 0)::16>>,
       <<elem(params.subscript_size, 1)::16>>,
       <<elem(params.subscript_offset, 0)::16>>,
@@ -127,4 +143,11 @@ defmodule PixelFont.TableSource.OS_2 do
     |> Enum.sum()
     |> div(num_glyphs)
   end
+
+  @spec convert_embedding(embedding()) :: integer()
+  defp convert_embedding(embedding)
+  defp convert_embedding(:installable), do: 0
+  defp convert_embedding(:restricted), do: 2
+  defp convert_embedding(:preview_and_print), do: 4
+  defp convert_embedding(:editable), do: 8
 end
