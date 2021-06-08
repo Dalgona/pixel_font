@@ -7,7 +7,6 @@ defmodule PixelFont.Font do
             metrics: %Metrics{},
             os_2: %OS_2{},
             glyph_sources: [],
-            notdef_glyph: nil,
             gpos_lookups: [],
             gsub_lookups: []
 
@@ -17,7 +16,6 @@ defmodule PixelFont.Font do
           metrics: Metrics.t(),
           os_2: OS_2.t(),
           glyph_sources: [module()],
-          notdef_glyph: module() | nil,
           gpos_lookups: [module()],
           gsub_lookups: [module()]
         }
