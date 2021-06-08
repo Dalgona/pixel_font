@@ -4,7 +4,7 @@ defmodule PixelFont.Builder do
   alias PixelFont.TableSource.{Cmap, Glyf, GPOS, GSUB, Head, Hmtx, Maxp, Name, OS_2, Post}
 
   def build_ttf(%Font{} = font) do
-    {:ok, _} = GlyphStorage.start_link(font.glyph_sources, font.notdef_glyph)
+    {:ok, _} = GlyphStorage.start_link(font.glyph_sources)
 
     glyf = Glyf.generate()
     hmtx = Hmtx.generate()

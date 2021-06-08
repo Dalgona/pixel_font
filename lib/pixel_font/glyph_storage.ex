@@ -3,8 +3,8 @@ defmodule PixelFont.GlyphStorage do
   alias PixelFont.Glyph
   alias PixelFont.Glyph.{BitmapData, CompositeData}
 
-  def start_link(glyph_sources, notdef_source) do
-    GenServer.start_link(__MODULE__, {glyph_sources, notdef_source}, name: __MODULE__)
+  def start_link(glyph_sources) do
+    GenServer.start_link(__MODULE__, glyph_sources, name: __MODULE__)
   end
 
   def all do
@@ -16,20 +16,31 @@ defmodule PixelFont.GlyphStorage do
   end
 
   @impl GenServer
-  def init({glyph_sources, notdef_source}) do
-    glyphs =
+  def init(glyph_sources) do
+    glyph_groups =
       glyph_sources
       |> Enum.map(& &1.glyphs)
       |> List.flatten()
+      |> Enum.group_by(&is_integer(&1.id))
 
-    notdef =
-      notdef_source.glyphs
-      |> Enum.filter(&(&1.id === ".notdef"))
-      |> Enum.take(1)
+    unicode_glyphs = glyph_groups[true] || []
+    named_glyphs = glyph_groups[false] || []
+    {notdef, named_glyphs} = pop_notdef(named_glyphs)
 
-    groups = Enum.group_by(glyphs, &is_integer(&1.id))
-    unicode_glyphs = groups[true] || []
-    named_glyphs = groups[false] || []
+    if notdef === nil do
+      IO.warn(
+        """
+        Could not find a glyph named ".notdef".
+
+        Although your font will still build successfully, many font validators
+        will judge your font invalid unless ".notdef" glyph exists as the very
+        first glyph in your font.
+
+        Define exactly one glyph named ".notdef" in any of your glyph modules,
+        and PixelFont will automatically set its glyph index to 0.
+        """
+      )
+    end
 
     sorted_glyphs =
       [
@@ -37,6 +48,7 @@ defmodule PixelFont.GlyphStorage do
         Enum.sort(unicode_glyphs, &(&1.id <= &2.id)),
         named_glyphs
       ]
+      |> Enum.reject(&is_nil/1)
       |> List.flatten()
       |> set_glyph_index([], 0)
 
@@ -57,6 +69,16 @@ defmodule PixelFont.GlyphStorage do
   def handle_call({:get, id}, _, {_, map} = state) do
     {:reply, map[id], state}
   end
+
+  @spec pop_notdef([Glyph.t()], [Glyph.t()]) :: {Glyph.t() | nil, [Glyph.t()]}
+  defp pop_notdef(glyphs, prev_glyphs \\ [])
+
+  defp pop_notdef([%Glyph{id: ".notdef"} = notdef | glyphs], prev_glyphs) do
+    {notdef, Enum.reverse(prev_glyphs) ++ glyphs}
+  end
+
+  defp pop_notdef([], prev_glyphs), do: {nil, Enum.reverse(prev_glyphs)}
+  defp pop_notdef([glyph | glyphs], prev_glyphs), do: pop_notdef(glyphs, [glyph | prev_glyphs])
 
   defp make_lookup(glyphs), do: Map.new(glyphs, &{&1.id, &1})
 
