@@ -43,18 +43,18 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.Common do
       end
 
     quote do
-      if true do
-        import unquote(__MODULE__), only: [feature: 2]
-        import unquote(dsl_module), only: unquote(lookup_attrs.imports)
+      (fn ->
+         import unquote(__MODULE__), only: [feature: 2]
+         import unquote(dsl_module), only: unquote(lookup_attrs.imports)
 
-        %Lookup{
-          owner: unquote(owner),
-          type: unquote(lookup_attrs.type),
-          name: unquote(name),
-          subtables: unquote(lookup_attrs.runtime_transform.(subtables_expr)),
-          features: unquote(features_expr)
-        }
-      end
+         %Lookup{
+           owner: unquote(owner),
+           type: unquote(lookup_attrs.type),
+           name: unquote(name),
+           subtables: unquote(lookup_attrs.runtime_transform.(subtables_expr)),
+           features: unquote(features_expr)
+         }
+       end).()
     end
   end
 

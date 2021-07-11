@@ -47,15 +47,15 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GPOS do
 
   defmacro context__8(do: do_block) do
     quote do
-      if true do
-        import Common, only: [backtrack: 1, input: 1, input: 2, lookahead: 1]
+      (fn ->
+         import Common, only: [backtrack: 1, input: 1, input: 2, lookahead: 1]
 
-        Common.__make_chained_ctx_subtable__(
-          unquote(get_exprs(do_block)),
-          ChainingContext3,
-          :positions
-        )
-      end
+         Common.__make_chained_ctx_subtable__(
+           unquote(get_exprs(do_block)),
+           ChainingContext3,
+           :positions
+         )
+       end).()
     end
   end
 

@@ -25,7 +25,7 @@ defmodule PixelFont.OTFLayout do
 
         unquote(module_block)
 
-        @spec lookups() :: [LookupList.t()]
+        @spec lookups() :: LookupList.t()
         def lookups do
           %LookupList{
             lookups:
