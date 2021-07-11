@@ -28,18 +28,16 @@ defmodule PixelFont.GlyphStorage do
     {notdef, named_glyphs} = pop_notdef(named_glyphs)
 
     if notdef === nil do
-      IO.warn(
-        """
-        Could not find a glyph named ".notdef".
+      IO.warn("""
+      Could not find a glyph named ".notdef".
 
-        Although your font will still build successfully, many font validators
-        will judge your font invalid unless ".notdef" glyph exists as the very
-        first glyph in your font.
+      Although your font will still build successfully, many font validators
+      will judge your font invalid unless ".notdef" glyph exists as the very
+      first glyph in your font.
 
-        Define exactly one glyph named ".notdef" in any of your glyph modules,
-        and PixelFont will automatically set its glyph index to 0.
-        """
-      )
+      Define exactly one glyph named ".notdef" in any of your glyph modules,
+      and PixelFont will automatically set its glyph index to 0.
+      """)
     end
 
     sorted_glyphs =
