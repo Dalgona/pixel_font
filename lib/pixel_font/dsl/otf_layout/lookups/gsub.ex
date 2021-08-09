@@ -9,6 +9,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
   alias PixelFont.TableSource.GSUB
   alias PixelFont.TableSource.GSUB.ChainingContext1
   alias PixelFont.TableSource.GSUB.ChainingContext3
+  alias PixelFont.TableSource.GSUB.Ligature1
   alias PixelFont.TableSource.GSUB.ReverseChainingContext1
   alias PixelFont.TableSource.GSUB.Single1
   alias PixelFont.TableSource.GSUB.Single2
@@ -26,9 +27,18 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
 
   def __handle_lookup__(:single_substitution) do
     %{
-      imports: [substitutions: 1],
+      imports: [substitutions__1: 1],
       type: 1,
-      ast_transform: & &1,
+      ast_transform: &replace_call(&1, :substitutions, 1, :substitutions__1),
+      runtime_transform: & &1
+    }
+  end
+
+  def __handle_lookup__(:ligature) do
+    %{
+      imports: [substitutions__4: 1],
+      type: 4,
+      ast_transform: &replace_call(&1, :substitutions, 1, :substitutions__4),
       runtime_transform: & &1
     }
   end
@@ -55,12 +65,25 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
     }
   end
 
-  defmacro substitutions(do: do_block) do
+  @spec substitutions(Macro.t()) :: no_return()
+  defmacro substitutions(_), do: block_direct_invocation!(__CALLER__)
+
+  defmacro substitutions__1(do: do_block) do
     quote do
       (fn ->
          import unquote(__MODULE__), only: [substitute: 2]
 
          unquote(__MODULE__).__make_single_subtable__(unquote(get_exprs(do_block)))
+       end).()
+    end
+  end
+
+  defmacro substitutions__4(do: do_block) do
+    quote do
+      (fn ->
+         import unquote(__MODULE__), only: [substitute: 2]
+
+         %Ligature1{substitutions: unquote(get_exprs(do_block))}
        end).()
     end
   end
