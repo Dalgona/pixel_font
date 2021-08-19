@@ -1,8 +1,17 @@
 defmodule PixelFont.TableSource.GSUB.ChainingContext1 do
+  alias PixelFont.Glyph
+
   defstruct [:subrulesets]
 
-  @type t :: %__MODULE__{subrulesets: %{optional(glyph_id) => [map()]}}
-  @typep glyph_id :: integer() | binary()
+  @type t :: %__MODULE__{subrulesets: subruleset()}
+  @type subruleset :: %{optional(Glyph.id()) => [subrule()]}
+
+  @type subrule :: %{
+          backtrack: [Glyph.id()],
+          input: [Glyph.id()],
+          lookahead: [Glyph.id()],
+          substitutions: [{integer(), term()}]
+        }
 
   defimpl PixelFont.TableSource.GSUB.Subtable do
     require PixelFont.Util, as: Util
@@ -43,8 +52,11 @@ defmodule PixelFont.TableSource.GSUB.ChainingContext1 do
       ])
     end
 
-    @spec compile_subrulesets([map()], integer(), GPOSGSUB.lookup_indices()) ::
-            {integer(), [binary()], [binary()]}
+    @spec compile_subrulesets(
+            [[ChainingContext1.subrule()]],
+            integer(),
+            GPOSGSUB.lookup_indices()
+          ) :: {integer(), [binary()], [binary()]}
     defp compile_subrulesets(subrulesets, offset_base, lookup_indices) do
       Util.offsetted_binaries(subrulesets, offset_base, fn subrules ->
         subrule_offset_base = 2 + length(subrules) * 2
@@ -56,7 +68,7 @@ defmodule PixelFont.TableSource.GSUB.ChainingContext1 do
       end)
     end
 
-    @spec compile_subrules([map()], integer(), GPOSGSUB.lookup_indices()) ::
+    @spec compile_subrules([ChainingContext1.subrule()], integer(), GPOSGSUB.lookup_indices()) ::
             {integer(), [binary()], [binary()]}
     defp compile_subrules(subrules, offset_base, lookup_indices) do
       Util.offsetted_binaries(subrules, offset_base, fn subrule ->
