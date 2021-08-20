@@ -7,7 +7,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
   alias PixelFont.DSL.OTFLayout.Lookups.Common
   alias PixelFont.Glyph
   alias PixelFont.TableSource.GSUB
-  alias PixelFont.TableSource.GSUB.ChainingContext1
+  alias PixelFont.TableSource.GSUB.ChainedContext1
   alias PixelFont.TableSource.GSUB.ChainingContext3
   alias PixelFont.TableSource.GSUB.Ligature1
   alias PixelFont.TableSource.GSUB.ReverseChainingContext1
@@ -145,7 +145,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
 
   @doc false
   @spec __try_convert_chain_format__([ChainingContext3.t()]) ::
-          [ChainingContext1.t() | ChainingContext3.t()]
+          [ChainedContext1.t() | ChainingContext3.t()]
   def __try_convert_chain_format__(subtables) do
     if Enum.all?(subtables, &simple_context?/1) do
       [convert_to_format_1(subtables)]
@@ -167,7 +167,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
   @spec singleton_coverage?(GlyphCoverage.t()) :: boolean()
   defp singleton_coverage?(coverage), do: length(coverage.glyphs) === 1
 
-  @spec convert_to_format_1([ChainingContext3.t()]) :: ChainingContext1.t()
+  @spec convert_to_format_1([ChainingContext3.t()]) :: ChainedContext1.t()
   defp convert_to_format_1(subtables) do
     rulesets =
       subtables
@@ -180,7 +180,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
         }
       end)
 
-    %ChainingContext1{rulesets: rulesets}
+    %ChainedContext1{rulesets: rulesets}
   end
 
   @spec flatten_sequence([GlyphCoverage.t()]) :: [Glyph.id()]
