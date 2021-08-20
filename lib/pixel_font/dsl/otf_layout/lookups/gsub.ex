@@ -169,18 +169,18 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
 
   @spec convert_to_format_1([ChainingContext3.t()]) :: ChainingContext1.t()
   defp convert_to_format_1(subtables) do
-    subrulesets =
+    rulesets =
       subtables
       |> Enum.group_by(&hd(hd(&1.input).glyphs), fn subtable ->
         %{
           backtrack: flatten_sequence(subtable.backtrack),
           input: flatten_sequence(tl(subtable.input)),
           lookahead: flatten_sequence(subtable.lookahead),
-          substitutions: subtable.substitutions
+          lookup_records: subtable.substitutions
         }
       end)
 
-    %ChainingContext1{subrulesets: subrulesets}
+    %ChainingContext1{rulesets: rulesets}
   end
 
   @spec flatten_sequence([GlyphCoverage.t()]) :: [Glyph.id()]
