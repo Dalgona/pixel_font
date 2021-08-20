@@ -1,11 +1,12 @@
 defmodule PixelFont.TableSource.OTFLayout.GlyphCoverage do
   require PixelFont.Util, as: Util
   import Util, only: :macros
+  alias PixelFont.Glyph
 
   defstruct [:glyphs]
 
-  @type t :: %__MODULE__{glyphs: [integer() | binary()]}
-  @type source :: [integer() | binary() | Range.t() | source()]
+  @type t :: %__MODULE__{glyphs: [Glyph.id()]}
+  @type source :: [Glyph.id() | Range.t() | source()]
 
   @spec of(source()) :: t()
   def of(glyphs) do
