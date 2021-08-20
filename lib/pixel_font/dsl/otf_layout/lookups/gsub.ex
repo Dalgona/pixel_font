@@ -7,11 +7,12 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
   alias PixelFont.DSL.OTFLayout.Lookups.Common
   alias PixelFont.Glyph
   alias PixelFont.TableSource.GSUB
-  alias PixelFont.TableSource.GSUB.ChainedContext1
   alias PixelFont.TableSource.GSUB.Ligature1
   alias PixelFont.TableSource.GSUB.ReverseChainingContext1
   alias PixelFont.TableSource.GSUB.Single1
   alias PixelFont.TableSource.GSUB.Single2
+  alias PixelFont.TableSource.OTFLayout.ChainedSequenceContext1
+  alias PixelFont.TableSource.OTFLayout.ChainedSequenceContext3
   alias PixelFont.TableSource.OTFLayout.GlyphCoverage
 
   @typep sub_record :: {Glyph.id(), Glyph.id()}
@@ -139,8 +140,8 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
   end
 
   @doc false
-  @spec __try_convert_chain_format__([ChainingContext3.t()]) ::
-          [ChainedContext1.t() | ChainingContext3.t()]
+  @spec __try_convert_chain_format__([ChainedSequenceContext3.t()]) ::
+          [ChainedSequenceContext1.t() | ChainedSequenceContext3.t()]
   def __try_convert_chain_format__(subtables) do
     if Enum.all?(subtables, &simple_context?/1) do
       [convert_to_format_1(subtables)]
@@ -149,7 +150,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
     end
   end
 
-  @spec simple_context?(ChainingContext3.t()) :: boolean()
+  @spec simple_context?(ChainedSequenceContext3.t()) :: boolean()
   defp simple_context?(subtable) do
     ~w(backtrack input lookahead)a
     |> Enum.map(&Map.get(subtable, &1))
@@ -162,7 +163,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
   @spec singleton_coverage?(GlyphCoverage.t()) :: boolean()
   defp singleton_coverage?(coverage), do: length(coverage.glyphs) === 1
 
-  @spec convert_to_format_1([ChainingContext3.t()]) :: ChainedContext1.t()
+  @spec convert_to_format_1([ChainedSequenceContext3.t()]) :: ChainedSequenceContext1.t()
   defp convert_to_format_1(subtables) do
     rulesets =
       subtables
@@ -175,7 +176,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
         }
       end)
 
-    %ChainedContext1{rulesets: rulesets}
+    %ChainedSequenceContext1{rulesets: rulesets}
   end
 
   @spec flatten_sequence([GlyphCoverage.t()]) :: [Glyph.id()]

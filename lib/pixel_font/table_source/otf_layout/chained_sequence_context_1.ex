@@ -6,6 +6,9 @@ defmodule PixelFont.TableSource.OTFLayout.ChainedSequenceContext1 do
   alias PixelFont.TableSource.OTFLayout.GlyphCoverage
   alias PixelFont.TableSource.OTFLayout.Lookup
 
+  defstruct rulesets: %{}
+
+  @type t :: %__MODULE__{rulesets: rulesets()}
   @type rulesets :: %{optional(Glyph.id()) => ruleset()}
   @type ruleset :: [rule()]
 
@@ -16,12 +19,13 @@ defmodule PixelFont.TableSource.OTFLayout.ChainedSequenceContext1 do
           lookup_records: [{integer(), Lookup.id()}]
         }
 
-  @spec compile(rulesets(), GPOSGSUB.lookup_indices()) :: binary()
-  def compile(ruleset, lookup_indices) do
-    ruleset_count = map_size(ruleset)
+  @spec compile(t(), keyword()) :: binary()
+  def compile(%__MODULE__{rulesets: rulesets}, opts) do
+    lookup_indices = opts[:lookup_indices]
+    ruleset_count = map_size(rulesets)
 
     {glyphs, rulesets} =
-      ruleset
+      rulesets
       |> Enum.map(fn {glyph_id, rules} -> {gid!(glyph_id), rules} end)
       |> Enum.sort_by(&elem(&1, 0))
       |> Enum.unzip()
@@ -88,9 +92,21 @@ defmodule PixelFont.TableSource.OTFLayout.ChainedSequenceContext1 do
       # lookaheadSequence[]
       Enum.map(rule.lookahead, &<<gid!(&1)::16>>),
       # seqLookupCount
-      <<length(compiled_lookup_records)>>,
+      <<length(compiled_lookup_records)::16>>,
       # seqLookupRecords[]
       compiled_lookup_records
     ]
+  end
+
+  defimpl PixelFont.TableSource.GPOS.Subtable do
+    alias PixelFont.TableSource.OTFLayout.ChainedSequenceContext1
+
+    defdelegate compile(subtable, opts), to: ChainedSequenceContext1
+  end
+
+  defimpl PixelFont.TableSource.GSUB.Subtable do
+    alias PixelFont.TableSource.OTFLayout.ChainedSequenceContext1
+
+    defdelegate compile(subtable, opts), to: ChainedSequenceContext1
   end
 end
