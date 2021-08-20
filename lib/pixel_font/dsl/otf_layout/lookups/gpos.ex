@@ -53,7 +53,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GPOS do
          Common.__make_chained_ctx_subtable__(
            unquote(get_exprs(do_block)),
            ChainingContext3,
-           :positions
+           :lookup_records
          )
        end).()
     end
