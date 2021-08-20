@@ -30,7 +30,11 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GPOS do
       imports: [context__8: 1],
       type: 8,
       ast_transform: &replace_call(&1, :context, 1, :context__8),
-      runtime_transform: & &1
+      runtime_transform: fn expr ->
+        quote do
+          Common.__try_convert_chain_format__(unquote(expr))
+        end
+      end
     }
   end
 
