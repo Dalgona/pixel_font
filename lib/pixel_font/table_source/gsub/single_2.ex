@@ -1,8 +1,9 @@
 defmodule PixelFont.TableSource.GSUB.Single2 do
-  defstruct [:substitutions]
+  alias PixelFont.Glyph
 
-  @type t :: %__MODULE__{substitutions: [{glyph_id(), glyph_id()}]}
-  @typep glyph_id :: integer() | binary()
+  defstruct substitutions: []
+
+  @type t :: %__MODULE__{substitutions: [{Glyph.id(), Glyph.id()}]}
 
   defimpl PixelFont.TableSource.GSUB.Subtable do
     alias PixelFont.TableSource.OTFLayout.GlyphCoverage

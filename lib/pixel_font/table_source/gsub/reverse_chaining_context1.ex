@@ -1,15 +1,16 @@
 defmodule PixelFont.TableSource.GSUB.ReverseChainingContext1 do
+  alias PixelFont.Glyph
   alias PixelFont.TableSource.OTFLayout.GlyphCoverage
 
-  defstruct [:backtrack, :lookahead, :substitutions]
+  defstruct backtrack: [],
+            lookahead: [],
+            substitutions: []
 
   @type t :: %__MODULE__{
           backtrack: [GlyphCoverage.t()],
           lookahead: [GlyphCoverage.t()],
-          substitutions: [{glyph_id(), glyph_id()}]
+          substitutions: [{Glyph.id(), Glyph.id()}]
         }
-
-  @type glyph_id :: integer() | binary()
 
   defimpl PixelFont.TableSource.GSUB.Subtable do
     require PixelFont.Util, as: Util

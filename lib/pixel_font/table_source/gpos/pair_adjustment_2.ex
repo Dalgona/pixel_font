@@ -2,7 +2,11 @@ defmodule PixelFont.TableSource.GPOS.PairAdjustment2 do
   alias PixelFont.TableSource.GPOS.ValueRecord
   alias PixelFont.TableSource.OTFLayout.ClassDefinition
 
-  defstruct ~w(class_1 class_2 value_format_1 value_format_2 records)a
+  defstruct class_1: %ClassDefinition{},
+            class_2: %ClassDefinition{},
+            value_format_1: [],
+            value_format_2: [],
+            records: %{}
 
   @type t :: %__MODULE__{
           class_1: ClassDefinition.t(),

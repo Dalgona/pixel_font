@@ -2,7 +2,9 @@ defmodule PixelFont.TableSource.GPOS.SingleAdjustment1 do
   alias PixelFont.TableSource.GPOS.ValueRecord
   alias PixelFont.TableSource.OTFLayout.GlyphCoverage
 
-  defstruct ~w(glyphs value_format value)a
+  defstruct glyphs: %GlyphCoverage{},
+            value_format: [],
+            value: %ValueRecord{}
 
   @type t :: %__MODULE__{
           glyphs: GlyphCoverage.t(),

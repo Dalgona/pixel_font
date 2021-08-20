@@ -1,16 +1,16 @@
 defmodule PixelFont.TableSource.GSUB.Ligature1 do
-  defstruct [:substitutions]
+  alias PixelFont.Glyph
 
-  @type t :: %__MODULE__{substitutions: [{[glyph_id()], glyph_id()}]}
-  @typep glyph_id :: integer() | binary()
+  defstruct substitutions: []
+
+  @type t :: %__MODULE__{substitutions: [{[Glyph.id()], Glyph.id()}]}
 
   defimpl PixelFont.TableSource.GSUB.Subtable do
     require PixelFont.Util, as: Util
     import Util, only: :macros
+    alias PixelFont.Glyph
     alias PixelFont.TableSource.GSUB.Ligature1
     alias PixelFont.TableSource.OTFLayout.GlyphCoverage
-
-    @typep glyph_id :: integer() | binary()
 
     @spec compile(Ligature1.t(), keyword()) :: binary()
     def compile(subtable, _opts) do
@@ -45,7 +45,7 @@ defmodule PixelFont.TableSource.GSUB.Ligature1 do
       ])
     end
 
-    @spec map_indices([{[glyph_id()], glyph_id()}]) :: [{[integer()], integer()}]
+    @spec map_indices([{[Glyph.id()], Glyph.id()}]) :: [{[integer()], integer()}]
     defp map_indices(substitutions) do
       Enum.map(substitutions, fn {components, lig_glyph} ->
         component_indices = Enum.map(components, &gid!(&1))

@@ -3,7 +3,7 @@ defmodule PixelFont.TableSource.OTFLayout.GlyphCoverage do
   import Util, only: :macros
   alias PixelFont.Glyph
 
-  defstruct [:glyphs]
+  defstruct glyphs: []
 
   @type t :: %__MODULE__{glyphs: [Glyph.id()]}
   @type source :: [Glyph.id() | Range.t() | source()]

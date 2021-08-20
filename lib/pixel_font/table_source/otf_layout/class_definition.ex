@@ -2,7 +2,7 @@ defmodule PixelFont.TableSource.OTFLayout.ClassDefinition do
   require PixelFont.Util, as: Util
   import Util, only: :macros
 
-  defstruct ~w(assignments)a
+  defstruct assignments: %{}
 
   @type t :: %__MODULE__{
           assignments: %{optional(integer()) => [integer() | binary()]}

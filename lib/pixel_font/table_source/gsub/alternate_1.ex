@@ -1,7 +1,7 @@
 defmodule PixelFont.TableSource.GSUB.Alternate1 do
   alias PixelFont.Glyph
 
-  defstruct [:alternatives]
+  defstruct alternatives: %{}
 
   @type t :: %__MODULE__{alternatives: %{optional(Glyph.id()) => [Glyph.id()]}}
 
