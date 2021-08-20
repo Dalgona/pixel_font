@@ -3,6 +3,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.Common do
 
   import PixelFont.DSL.MacroHelper
   alias PixelFont.Glyph
+  alias PixelFont.TableSource.OTFLayout.ChainedSequenceContext1
   alias PixelFont.TableSource.OTFLayout.ChainedSequenceContext3
   alias PixelFont.TableSource.OTFLayout.GlyphCoverage
   alias PixelFont.TableSource.OTFLayout.Lookup
@@ -98,4 +99,47 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.Common do
 
   @spec lookahead(Macro.t()) :: Macro.t()
   defmacro lookahead(glyphs), do: quote(do: {:lookahead, unquote(glyphs), nil})
+
+  @doc false
+  @spec __try_convert_chain_format__([ChainedSequenceContext3.t()]) ::
+          [ChainedSequenceContext1.t() | ChainedSequenceContext3.t()]
+  def __try_convert_chain_format__(subtables) do
+    if Enum.all?(subtables, &simple_context?/1) do
+      [convert_to_format_1(subtables)]
+    else
+      subtables
+    end
+  end
+
+  @spec simple_context?(ChainedSequenceContext3.t()) :: boolean()
+  defp simple_context?(subtable) do
+    ~w(backtrack input lookahead)a
+    |> Enum.map(&Map.get(subtable, &1))
+    |> Enum.all?(&singleton_sequence?/1)
+  end
+
+  @spec singleton_sequence?([GlyphCoverage.t()]) :: boolean()
+  defp singleton_sequence?(seq), do: Enum.all?(seq, &singleton_coverage?/1)
+
+  @spec singleton_coverage?(GlyphCoverage.t()) :: boolean()
+  defp singleton_coverage?(coverage), do: length(coverage.glyphs) === 1
+
+  @spec convert_to_format_1([ChainedSequenceContext3.t()]) :: ChainedSequenceContext1.t()
+  defp convert_to_format_1(subtables) do
+    rulesets =
+      subtables
+      |> Enum.group_by(&hd(hd(&1.input).glyphs), fn subtable ->
+        %{
+          backtrack: flatten_sequence(subtable.backtrack),
+          input: flatten_sequence(tl(subtable.input)),
+          lookahead: flatten_sequence(subtable.lookahead),
+          lookup_records: subtable.lookup_records
+        }
+      end)
+
+    %ChainedSequenceContext1{rulesets: rulesets}
+  end
+
+  @spec flatten_sequence([GlyphCoverage.t()]) :: [Glyph.id()]
+  defp flatten_sequence(sequence), do: Enum.map(sequence, &hd(&1.glyphs))
 end
