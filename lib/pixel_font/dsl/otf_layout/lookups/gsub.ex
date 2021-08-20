@@ -8,7 +8,6 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
   alias PixelFont.Glyph
   alias PixelFont.TableSource.GSUB
   alias PixelFont.TableSource.GSUB.ChainedContext1
-  alias PixelFont.TableSource.GSUB.ChainingContext3
   alias PixelFont.TableSource.GSUB.Ligature1
   alias PixelFont.TableSource.GSUB.ReverseChainingContext1
   alias PixelFont.TableSource.GSUB.Single1
@@ -99,11 +98,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
       (fn ->
          import Common, only: [backtrack: 1, input: 1, input: 2, lookahead: 1]
 
-         Common.__make_chained_ctx_subtable__(
-           unquote(get_exprs(do_block)),
-           ChainingContext3,
-           :lookup_records
-         )
+         Common.__make_chained_ctx_subtable__(unquote(get_exprs(do_block)))
        end).()
     end
   end

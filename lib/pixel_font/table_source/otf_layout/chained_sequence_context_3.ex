@@ -1,17 +1,19 @@
 defmodule PixelFont.TableSource.OTFLayout.ChainedSequenceContext3 do
-  alias PixelFont.TableSource.GPOSGSUB
   alias PixelFont.TableSource.OTFLayout.GlyphCoverage
   alias PixelFont.TableSource.OTFLayout.Lookup
 
-  @type context :: %{
+  defstruct backtrack: [], input: [], lookahead: [], lookup_records: []
+
+  @type t :: %__MODULE__{
           backtrack: [GlyphCoverage.t()],
           input: [GlyphCoverage.t()],
           lookahead: [GlyphCoverage.t()],
           lookup_records: [{integer(), Lookup.id()}]
         }
 
-  @spec compile(context(), GPOSGSUB.lookup_indices()) :: binary()
-  def compile(context, lookup_indices) do
+  @spec compile(t(), keyword()) :: binary()
+  def compile(%__MODULE__{} = context, opts) do
+    lookup_indices = opts[:lookup_indices]
     lookup_record_count = length(context.lookup_records)
     sequences = [context.backtrack, context.input, context.lookahead]
     context_length = sequences |> Enum.map(&length/1) |> Enum.sum()
@@ -35,5 +37,17 @@ defmodule PixelFont.TableSource.OTFLayout.ChainedSequenceContext3 do
       # Coverage tables
       coverages
     ])
+  end
+
+  defimpl PixelFont.TableSource.GPOS.Subtable do
+    alias PixelFont.TableSource.OTFLayout.ChainedSequenceContext3
+
+    defdelegate compile(subtable, opts), to: ChainedSequenceContext3
+  end
+
+  defimpl PixelFont.TableSource.GSUB.Subtable do
+    alias PixelFont.TableSource.OTFLayout.ChainedSequenceContext3
+
+    defdelegate compile(subtable, opts), to: ChainedSequenceContext3
   end
 end

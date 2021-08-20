@@ -4,7 +4,6 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GPOS do
   import PixelFont.DSL.MacroHelper
   alias PixelFont.DSL.OTFLayout.Lookups.Common
   alias PixelFont.TableSource.GPOS
-  alias PixelFont.TableSource.GPOS.ChainingContext3
   alias PixelFont.TableSource.GPOS.SingleAdjustment1
   alias PixelFont.TableSource.GPOS.ValueRecord
   alias PixelFont.TableSource.OTFLayout.GlyphCoverage
@@ -50,11 +49,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GPOS do
       (fn ->
          import Common, only: [backtrack: 1, input: 1, input: 2, lookahead: 1]
 
-         Common.__make_chained_ctx_subtable__(
-           unquote(get_exprs(do_block)),
-           ChainingContext3,
-           :lookup_records
-         )
+         Common.__make_chained_ctx_subtable__(unquote(get_exprs(do_block)))
        end).()
     end
   end

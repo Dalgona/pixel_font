@@ -3,6 +3,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.Common do
 
   import PixelFont.DSL.MacroHelper
   alias PixelFont.Glyph
+  alias PixelFont.TableSource.OTFLayout.ChainedSequenceContext3
   alias PixelFont.TableSource.OTFLayout.GlyphCoverage
   alias PixelFont.TableSource.OTFLayout.Lookup
 
@@ -58,8 +59,8 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.Common do
     end
   end
 
-  @spec __make_chained_ctx_subtable__([sequence()], module(), atom()) :: struct()
-  def __make_chained_ctx_subtable__(context, struct_module, apply_key) do
+  @spec __make_chained_ctx_subtable__([sequence()]) :: struct()
+  def __make_chained_ctx_subtable__(context) do
     seq_group =
       context
       |> Enum.map(fn {type, glyphs, lookup} ->
@@ -75,14 +76,12 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.Common do
       |> Enum.reject(fn {{_cov, lookup}, _idx} -> is_nil(lookup) end)
       |> Enum.map(fn {{_cov, lookup}, index} -> {index, lookup} end)
 
-    struct_fields = [
-      {apply_key, apply},
+    %ChainedSequenceContext3{
       backtrack: Enum.map(seq_group[:backtrack] || [], &elem(&1, 0)),
       input: Enum.map(input_seq, &elem(&1, 0)),
-      lookahead: Enum.map(seq_group[:lookahead] || [], &elem(&1, 0))
-    ]
-
-    struct!(struct_module, struct_fields)
+      lookahead: Enum.map(seq_group[:lookahead] || [], &elem(&1, 0)),
+      lookup_records: apply
+    }
   end
 
   @spec feature(Macro.t(), Macro.t()) :: no_return()
