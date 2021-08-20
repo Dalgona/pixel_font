@@ -102,7 +102,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
          Common.__make_chained_ctx_subtable__(
            unquote(get_exprs(do_block)),
            ChainingContext3,
-           :substitutions
+           :lookup_records
          )
        end).()
     end
@@ -176,7 +176,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
           backtrack: flatten_sequence(subtable.backtrack),
           input: flatten_sequence(tl(subtable.input)),
           lookahead: flatten_sequence(subtable.lookahead),
-          lookup_records: subtable.substitutions
+          lookup_records: subtable.lookup_records
         }
       end)
 

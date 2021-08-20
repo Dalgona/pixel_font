@@ -1,40 +1,25 @@
 defmodule PixelFont.TableSource.GSUB.ChainingContext3 do
   alias PixelFont.TableSource.OTFLayout.GlyphCoverage
+  alias PixelFont.TableSource.OTFLayout.Lookup
 
-  defstruct [:backtrack, :input, :lookahead, :substitutions]
+  defstruct backtrack: [], input: [], lookahead: [], lookup_records: []
 
   @type t :: %__MODULE__{
           backtrack: [GlyphCoverage.t()],
           input: [GlyphCoverage.t()],
           lookahead: [GlyphCoverage.t()],
-          substitutions: [{integer(), term()}]
+          lookup_records: [{integer(), Lookup.id()}]
         }
 
   defimpl PixelFont.TableSource.GSUB.Subtable do
     alias PixelFont.TableSource.GSUB.ChainingContext3
-    alias PixelFont.TableSource.OTFLayout.GlyphCoverage
+    alias PixelFont.TableSource.OTFLayout.ChainedSequenceContext3
 
     @spec compile(ChainingContext3.t(), keyword()) :: binary()
     def compile(subtable, opts) do
       lookup_indices = opts[:lookup_indices]
-      sub_count = length(subtable.substitutions)
-      seqs = [subtable.backtrack, subtable.input, subtable.lookahead]
-      counts = seqs |> Enum.map(&length/1) |> Enum.sum()
-      offset_base = 10 + counts * 2 + sub_count * 4
-      {offsets, coverages} = GlyphCoverage.compile_coverage_records(seqs, offset_base)
 
-      sub_records =
-        Enum.map(subtable.substitutions, fn {glyph_pos, lookup_name} ->
-          <<glyph_pos::16, lookup_indices[lookup_name]::16>>
-        end)
-
-      IO.iodata_to_binary([
-        <<3::16>>,
-        offsets,
-        <<sub_count::16>>,
-        sub_records,
-        coverages
-      ])
+      ChainedSequenceContext3.compile(subtable, lookup_indices)
     end
   end
 end
