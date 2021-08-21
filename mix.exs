@@ -9,13 +9,21 @@ defmodule PixelFont.Mixfile do
       deps: deps(),
       dialyzer: [
         plt_add_apps: [:mix]
+      ],
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test
       ]
     ]
   end
 
   defp deps do
     [
-      {:dialyxir, "~> 1.0", only: :dev, runtime: false}
+      {:dialyxir, "~> 1.0", only: :dev, runtime: false},
+      {:excoveralls, "~> 0.14", only: :test}
     ]
   end
 end
