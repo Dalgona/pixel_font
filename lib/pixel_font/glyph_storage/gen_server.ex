@@ -1,4 +1,4 @@
-defmodule PixelFont.GlyphStorage do
+defmodule PixelFont.GlyphStorage.GenServer do
   use GenServer
   alias PixelFont.Glyph
   alias PixelFont.Glyph.{BitmapData, CompositeData}

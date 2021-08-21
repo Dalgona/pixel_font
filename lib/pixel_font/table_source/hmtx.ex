@@ -1,7 +1,7 @@
 defmodule PixelFont.TableSource.Hmtx do
   alias PixelFont.CompiledTable
   alias PixelFont.Font.Metrics
-  alias PixelFont.GlyphStorage
+  alias PixelFont.GlyphStorage.GenServer, as: GlyphStorage
   alias PixelFont.TableSource.Hmtx.Record
 
   defstruct ~w(records)a

@@ -2,7 +2,7 @@ defmodule PixelFont.TableSource.Post do
   alias PixelFont.CompiledTable
   alias PixelFont.Font.Metrics
   alias PixelFont.Glyph
-  alias PixelFont.GlyphStorage
+  alias PixelFont.GlyphStorage.GenServer, as: GlyphStorage
   alias PixelFont.TableSource.Post.AGLFN
 
   @spec compile(Metrics.t(), integer()) :: CompiledTable.t()

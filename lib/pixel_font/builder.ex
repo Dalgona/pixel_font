@@ -1,6 +1,6 @@
 defmodule PixelFont.Builder do
   alias PixelFont.Font
-  alias PixelFont.GlyphStorage
+  alias PixelFont.GlyphStorage.GenServer, as: GlyphStorage
   alias PixelFont.TableSource.{Cmap, DSIG, Glyf, GPOS, GSUB, Head, Hmtx, Maxp, Name, OS_2, Post}
 
   def build_ttf(%Font{} = font) do
