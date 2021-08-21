@@ -1,5 +1,7 @@
 # PixelFont
 
+[![GitHub Workflow Status](https://github.com/Dalgona/pixel_font/actions/workflows/run_tests.yml/badge.svg)](https://github.com/Dalgona/pixel_font/actions/workflows/run_tests.yml) [![Coverage Status](https://coveralls.io/repos/github/Dalgona/pixel_font/badge.svg?branch=main)](https://coveralls.io/github/Dalgona/pixel_font?branch=main)
+
 "PixelFont" is an all-in-one tool for creating TrueType outline fonts from bitmap glyph data.
 
 "PixelFont" implements a subset of the [OpenType specification](https://docs.microsoft.com/en-us/typography/opentype/spec/), purely in [Elixir](https://elixir-lang.org) programming language.
