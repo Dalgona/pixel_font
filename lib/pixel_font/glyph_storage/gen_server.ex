@@ -2,15 +2,20 @@ defmodule PixelFont.GlyphStorage.GenServer do
   use GenServer
   alias PixelFont.Glyph
   alias PixelFont.Glyph.{BitmapData, CompositeData}
+  alias PixelFont.GlyphStorage
+
+  @behaviour GlyphStorage
 
   def start_link(glyph_sources) do
     GenServer.start_link(__MODULE__, glyph_sources, name: __MODULE__)
   end
 
+  @impl GlyphStorage
   def all do
     GenServer.call(__MODULE__, :all, :infinity)
   end
 
+  @impl GlyphStorage
   def get(id) do
     GenServer.call(__MODULE__, {:get, id}, :infinity)
   end

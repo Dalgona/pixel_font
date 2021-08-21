@@ -2,7 +2,7 @@ defmodule PixelFont.TableSource.Cmap do
   require PixelFont.Util, as: Util
   import Util, only: :macros
   alias PixelFont.CompiledTable
-  alias PixelFont.GlyphStorage.GenServer, as: GlyphStorage
+  alias PixelFont.GlyphStorage
   alias PixelFont.TableSource.Name.Definitions, as: Defs
 
   @spec compile() :: CompiledTable.t()

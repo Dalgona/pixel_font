@@ -38,7 +38,7 @@ defmodule PixelFont.Util do
   defmacro gid!(id) do
     quote bind_quoted: [id: id] do
       id
-      |> PixelFont.GlyphStorage.GenServer.get()
+      |> PixelFont.GlyphStorage.get()
       |> case do
         nil -> raise "GID for #{inspect(id)} not found"
         glyph -> glyph.gid

@@ -3,7 +3,7 @@ defmodule PixelFont.TableSource.OS_2 do
   alias PixelFont.Font.Metrics
   alias PixelFont.Glyph
   alias PixelFont.Glyph.{BitmapData, CompositeData}
-  alias PixelFont.GlyphStorage.GenServer, as: GlyphStorage
+  alias PixelFont.GlyphStorage
   alias PixelFont.TableSource.OS_2.Enums
   alias PixelFont.TableSource.OS_2.UnicodeRanges
 

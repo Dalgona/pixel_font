@@ -2,7 +2,7 @@ defmodule PixelFont.TableSource.Maxp do
   alias PixelFont.CompiledTable
   alias PixelFont.Glyph
   alias PixelFont.Glyph.{BitmapData, CompositeData}
-  alias PixelFont.GlyphStorage.GenServer, as: GlyphStorage
+  alias PixelFont.GlyphStorage
 
   defstruct [
     :num_glyphs,

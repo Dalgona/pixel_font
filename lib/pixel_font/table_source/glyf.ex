@@ -1,6 +1,6 @@
 defmodule PixelFont.TableSource.Glyf do
   alias PixelFont.CompiledTable
-  alias PixelFont.GlyphStorage.GenServer, as: GlyphStorage
+  alias PixelFont.GlyphStorage
   alias PixelFont.TableSource.Glyf.Item
 
   defstruct ~w(items)a
