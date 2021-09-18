@@ -6,7 +6,7 @@ defmodule PixelFont.Util do
   defmacro sigil_i(str_expr, 'd'), do: do_sigil_i(str_expr, 10)
   defmacro sigil_i(str_expr, 'x'), do: do_sigil_i(str_expr, 16)
 
-  @spec sigil_i(Macro.t(), integer()) :: Macro.t()
+  @spec do_sigil_i(Macro.t(), integer()) :: Macro.t()
   defp do_sigil_i(str_expr, base) do
     quote(do: unquote(__MODULE__).__sigil_i__(unquote(str_expr), unquote(base)))
   end
