@@ -14,14 +14,12 @@ defmodule PixelFont.TableSource.OTFLayout.ClassDefinition do
   def compile(class_def) do
     assignments =
       class_def.assignments
-      |> Enum.map(fn {class, ids} ->
-        ids |> Enum.map(&gid!(&1)) |> Enum.map(&{&1, class})
-      end)
+      |> Enum.map(fn {class, ids} -> Enum.map(ids, &{gid!(&1), class}) end)
       |> List.flatten()
       |> Enum.sort_by(&elem(&1, 0))
 
     assignments
-    |> do_compile(detect_format(assignments))
+    |> do_compile(detect_format(assignments, []))
     |> IO.iodata_to_binary()
   end
 
@@ -80,13 +78,26 @@ defmodule PixelFont.TableSource.OTFLayout.ClassDefinition do
     ]
   end
 
-  @spec detect_format([assignment()]) :: integer()
-  defp detect_format(assignments)
-  defp detect_format([_]), do: 1
+  @spec detect_format([assignment()], [assignment()]) :: integer()
+  defp detect_format(assignments, past_assignments)
 
-  defp detect_format([{i1, _}, {i2, _} = assignment | assignments]) do
-    case i2 - i1 do
-      1 -> detect_format([assignment | assignments])
+  defp detect_format([assignment], past_assignments) do
+    range_count =
+      [assignment | past_assignments]
+      |> Enum.reverse()
+      |> Enum.chunk_by(&elem(&1, 1))
+      |> length()
+
+    glyph_count = length(past_assignments) + 1
+    fmt1_size = 6 + 2 * glyph_count
+    fmt2_size = 4 + 6 * range_count
+
+    if(fmt1_size < fmt2_size, do: 1, else: 2)
+  end
+
+  defp detect_format([assignment1, assignment2 | assignments], past_assignments) do
+    case elem(assignment2, 0) - elem(assignment1, 0) do
+      1 -> detect_format([assignment2 | assignments], [assignment1 | past_assignments])
       _ -> 2
     end
   end

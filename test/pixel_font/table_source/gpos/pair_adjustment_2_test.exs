@@ -31,7 +31,7 @@ defmodule PixelFont.TableSource.GPOS.PairAdjustment2Test do
 
       expected =
         [
-          [2, 52, 0x04, 0x01, 62, 80, 3, 3],
+          [2, 52, 0x04, 0x01, 62, 78, 3, 3],
           # Class records,
           [
             [[0, 0], [0, 0], [0, 0]],
@@ -41,7 +41,7 @@ defmodule PixelFont.TableSource.GPOS.PairAdjustment2Test do
           # Coverage table
           [2, 1, ?a, ?f, 0],
           # Class definitions 1
-          [1, ?a, 6, 1, 1, 1, 2, 2, 2],
+          [2, 2, [?a, ?c, 1], [?d, ?f, 2]],
           # Class definitions 2
           [2, 2, [?p, ?r, 1], [?x, ?z, 2]]
         ]
