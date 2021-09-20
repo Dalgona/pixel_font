@@ -1,6 +1,5 @@
 defmodule PixelFont.TableSource.GPOS.PairAdjustment2Test do
-  use ExUnit.Case
-  import Mox
+  use PixelFont.Case, async: true
   alias PixelFont.Glyph
   alias PixelFont.TableSource.GPOS.PairAdjustment2
   alias PixelFont.TableSource.GPOS.Subtable
@@ -30,7 +29,7 @@ defmodule PixelFont.TableSource.GPOS.PairAdjustment2Test do
       compiled_subtable = Subtable.compile(subtable, [])
 
       expected =
-        [
+        to_wordstring([
           [2, 52, 0x04, 0x01, 62, 78, 3, 3],
           # Class records,
           [
@@ -44,10 +43,7 @@ defmodule PixelFont.TableSource.GPOS.PairAdjustment2Test do
           [2, 2, [?a, ?c, 1], [?d, ?f, 2]],
           # Class definitions 2
           [2, 2, [?p, ?r, 1], [?x, ?z, 2]]
-        ]
-        |> List.flatten()
-        |> Enum.map(&<<&1::16>>)
-        |> IO.iodata_to_binary()
+        ])
 
       assert compiled_subtable === expected
     end

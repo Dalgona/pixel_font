@@ -1,6 +1,5 @@
 defmodule PixelFont.TableSource.OTFLayout.ChainedSequenceContext3Test do
-  use ExUnit.Case, async: true
-  import Mox
+  use PixelFont.Case, async: true
   alias PixelFont.Glyph
   alias PixelFont.TableSource.OTFLayout.ChainedSequenceContext3
   alias PixelFont.TableSource.OTFLayout.GlyphCoverage
@@ -22,7 +21,7 @@ defmodule PixelFont.TableSource.OTFLayout.ChainedSequenceContext3Test do
         ChainedSequenceContext3.compile(subtable, lookup_indices: lookup_indices)
 
       expected =
-        [
+        to_wordstring([
           [3, 1, 26, 2, 36, 46, 1, 56, 2],
           # Lookup records
           [[0, 10], [1, 20]],
@@ -32,10 +31,7 @@ defmodule PixelFont.TableSource.OTFLayout.ChainedSequenceContext3Test do
           [[2, 1, ?d, ?f, 0], [2, 1, ?g, ?i, 0]],
           # Lookahead coverage tables
           [[2, 1, ?j, ?l, 0]]
-        ]
-        |> List.flatten()
-        |> Enum.map(&<<&1::16>>)
-        |> IO.iodata_to_binary()
+        ])
 
       assert compiled_subtable === expected
     end

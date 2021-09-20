@@ -1,6 +1,5 @@
 defmodule PixelFont.TableSource.GSUB.Multiple1Test do
-  use ExUnit.Case, async: true
-  import Mox
+  use PixelFont.Case, async: true
   alias PixelFont.Glyph
   alias PixelFont.TableSource.GSUB.Multiple1
   alias PixelFont.TableSource.GSUB.Subtable
@@ -14,16 +13,13 @@ defmodule PixelFont.TableSource.GSUB.Multiple1Test do
       compiled_subtable = Subtable.compile(subtable, [])
 
       expected =
-        [
+        to_wordstring([
           [1, 10, 2, 18, 24],
           # Coverage table
           [1, 2, 'AB'],
           # Sequence tables
           [[2, 'aa'], [2, 'bb']]
-        ]
-        |> List.flatten()
-        |> Enum.map(&<<&1::16>>)
-        |> IO.iodata_to_binary()
+        ])
 
       assert compiled_subtable === expected
     end

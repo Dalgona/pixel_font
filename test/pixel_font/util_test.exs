@@ -1,5 +1,5 @@
 defmodule PixelFont.UtilTest do
-  use ExUnit.Case
+  use PixelFont.Case, async: true
   require PixelFont.Util, as: Util
   import Util, only: [sigil_i: 2, elem!: 2]
 

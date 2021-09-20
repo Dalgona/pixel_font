@@ -1,5 +1,5 @@
 defmodule PixelFont.TableSource.GPOS.ValueRecordTest do
-  use ExUnit.Case, async: true
+  use PixelFont.Case, async: true
   alias PixelFont.TableSource.GPOS.ValueRecord
 
   describe "compile/2" do

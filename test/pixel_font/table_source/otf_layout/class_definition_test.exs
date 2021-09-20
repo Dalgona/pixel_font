@@ -1,6 +1,5 @@
 defmodule PixelFont.TableSource.OTFLayout.ClassDefinitionTest do
-  use ExUnit.Case
-  import Mox
+  use PixelFont.Case, async: true
   alias PixelFont.Glyph
   alias PixelFont.TableSource.OTFLayout.ClassDefinition
 
@@ -15,14 +14,11 @@ defmodule PixelFont.TableSource.OTFLayout.ClassDefinitionTest do
       compiled_classes1 = ClassDefinition.compile(classes1)
 
       expected1 =
-        [
+        to_wordstring([
           [1, ?a, 6],
           # Class values
           [1, 1, 2, 2, 3, 3]
-        ]
-        |> List.flatten()
-        |> Enum.map(&<<&1::16>>)
-        |> IO.iodata_to_binary()
+        ])
 
       assert compiled_classes1 === expected1
 
@@ -32,14 +28,11 @@ defmodule PixelFont.TableSource.OTFLayout.ClassDefinitionTest do
       compiled_classes2 = ClassDefinition.compile(classes2)
 
       expected2 =
-        [
+        to_wordstring([
           [2, 1],
           # Class range records
           [[?a, ?f, 1]]
-        ]
-        |> List.flatten()
-        |> Enum.map(&<<&1::16>>)
-        |> IO.iodata_to_binary()
+        ])
 
       assert compiled_classes2 === expected2
     end
@@ -52,14 +45,11 @@ defmodule PixelFont.TableSource.OTFLayout.ClassDefinitionTest do
       compiled_classes = ClassDefinition.compile(classes)
 
       expected =
-        [
+        to_wordstring([
           [2, 4],
           # Class range records
           [[?0, ?0, 1], [?9, ?9, 1], [?a, ?a, 2], [?z, ?z, 2]]
-        ]
-        |> List.flatten()
-        |> Enum.map(&<<&1::16>>)
-        |> IO.iodata_to_binary()
+        ])
 
       assert compiled_classes === expected
     end

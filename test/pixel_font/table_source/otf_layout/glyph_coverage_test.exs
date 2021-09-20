@@ -1,6 +1,5 @@
 defmodule PixelFont.TableSource.OTFLayout.GlyphCoverageTest do
-  use ExUnit.Case
-  import Mox
+  use PixelFont.Case, async: true
   alias PixelFont.Glyph
   alias PixelFont.TableSource.OTFLayout.GlyphCoverage
 
@@ -23,10 +22,7 @@ defmodule PixelFont.TableSource.OTFLayout.GlyphCoverageTest do
         |> GlyphCoverage.of()
         |> GlyphCoverage.compile()
 
-      expected =
-        [1, 8, 1010, 1020, 1030, 1040, 2010, 2020, 2030, 2040]
-        |> Enum.map(&<<&1::16>>)
-        |> IO.iodata_to_binary()
+      expected = to_wordstring([1, 8, 1010, 1020, 1030, 1040, 2010, 2020, 2030, 2040])
 
       assert compiled_coverage === expected
     end
@@ -37,10 +33,7 @@ defmodule PixelFont.TableSource.OTFLayout.GlyphCoverageTest do
         |> GlyphCoverage.of()
         |> GlyphCoverage.compile()
 
-      expected =
-        [2, 2, 1001, 1004, 0, 2001, 2004, 4]
-        |> Enum.map(&<<&1::16>>)
-        |> IO.iodata_to_binary()
+      expected = to_wordstring([2, 2, 1001, 1004, 0, 2001, 2004, 4])
 
       assert compiled_coverage === expected
     end
@@ -53,10 +46,7 @@ defmodule PixelFont.TableSource.OTFLayout.GlyphCoverageTest do
         |> GlyphCoverage.of()
         |> GlyphCoverage.compile(internal: true)
 
-      expected =
-        [2, 1, 1, 4, 0]
-        |> Enum.map(&<<&1::16>>)
-        |> IO.iodata_to_binary()
+      expected = to_wordstring([2, 1, 1, 4, 0])
 
       assert compiled_coverage === expected
     end

@@ -1,5 +1,5 @@
 defmodule PixelFont.TableSource.GSUB.Single2Test do
-  use ExUnit.Case, async: true
+  use PixelFont.Case, async: true
   alias PixelFont.TableSource.GSUB.Single2
   alias PixelFont.TableSource.GSUB.Subtable
 
@@ -12,14 +12,11 @@ defmodule PixelFont.TableSource.GSUB.Single2Test do
       compiled_subtable = Subtable.compile(subtable, [])
 
       expected =
-        [
+        to_wordstring([
           [2, 16, 5, 'abcde'],
           # Coverage table
           [2, 1, ?A, ?E, 0]
-        ]
-        |> List.flatten()
-        |> Enum.map(&<<&1::16>>)
-        |> IO.iodata_to_binary()
+        ])
 
       assert compiled_subtable === expected
     end

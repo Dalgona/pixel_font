@@ -1,6 +1,5 @@
 defmodule PixelFont.TableSource.GSUB.ReverseChainingContext1Test do
-  use ExUnit.Case, async: true
-  import Mox
+  use PixelFont.Case, async: true
   alias PixelFont.Glyph
   alias PixelFont.TableSource.GSUB.ReverseChainingContext1
   alias PixelFont.TableSource.GSUB.Subtable
@@ -19,7 +18,7 @@ defmodule PixelFont.TableSource.GSUB.ReverseChainingContext1Test do
       compiled_subtable = Subtable.compile(subtable, [])
 
       expected =
-        [
+        to_wordstring([
           [1, 22, 2, 30, 40, 2, 50, 60, 2, '01'],
           # Coverage table
           [1, 2, 'XY'],
@@ -27,10 +26,7 @@ defmodule PixelFont.TableSource.GSUB.ReverseChainingContext1Test do
           [[2, 1, ?a, ?c, 0], [2, 1, ?d, ?f, 0]],
           # Lookahead coverage tables
           [[2, 1, ?u, ?w, 0], [2, 1, ?x, ?z, 0]]
-        ]
-        |> List.flatten()
-        |> Enum.map(&<<&1::16>>)
-        |> IO.iodata_to_binary()
+        ])
 
       assert compiled_subtable === expected
     end

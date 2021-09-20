@@ -1,6 +1,5 @@
 defmodule PixelFont.TableSource.GPOS.SingleAdjustment1Test do
-  use ExUnit.Case
-  import Mox
+  use PixelFont.Case, async: true
   alias PixelFont.Glyph
   alias PixelFont.TableSource.GPOS.SingleAdjustment1
   alias PixelFont.TableSource.GPOS.Subtable
@@ -20,14 +19,11 @@ defmodule PixelFont.TableSource.GPOS.SingleAdjustment1Test do
       compiled_subtable = Subtable.compile(subtable, [])
 
       expected =
-        [
+        to_wordstring([
           [1, 8, 1, 10],
           # Coverage table
           [2, 1, ?a, ?e, 0]
-        ]
-        |> List.flatten()
-        |> Enum.map(&<<&1::16>>)
-        |> IO.iodata_to_binary()
+        ])
 
       assert compiled_subtable === expected
     end
