@@ -80,6 +80,7 @@ defmodule PixelFont.TableSource.OTFLayout.ClassDefinition do
 
   @spec detect_format([assignment()], [assignment()]) :: integer()
   defp detect_format(assignments, past_assignments)
+  defp detect_format([], []), do: 2
 
   defp detect_format([assignment], past_assignments) do
     range_count =

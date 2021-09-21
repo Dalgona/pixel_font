@@ -32,7 +32,7 @@ defmodule PixelFont.TableSource.OTFLayout.SequenceContext2 do
       |> GlyphCoverage.of()
       |> GlyphCoverage.compile()
 
-    max_input_class = input_classes.assignments |> Map.keys() |> Enum.max()
+    max_input_class = input_classes.assignments |> Map.keys() |> Enum.max(fn -> 0 end)
     coverage_offset = 10 + max_input_class * 2
     class_def_offset = coverage_offset + byte_size(coverage)
     compiled_class_def = ClassDefinition.compile(subtable.input_classes)
