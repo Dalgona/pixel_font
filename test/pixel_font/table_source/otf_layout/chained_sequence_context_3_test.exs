@@ -1,6 +1,7 @@
 defmodule PixelFont.TableSource.OTFLayout.ChainedSequenceContext3Test do
   use PixelFont.Case, async: true
   alias PixelFont.Glyph
+  alias PixelFont.TableSource.{GPOS, GSUB}
   alias PixelFont.TableSource.OTFLayout.ChainedSequenceContext3
   alias PixelFont.TableSource.OTFLayout.GlyphCoverage
 
@@ -34,6 +35,16 @@ defmodule PixelFont.TableSource.OTFLayout.ChainedSequenceContext3Test do
         ])
 
       assert compiled_subtable === expected
+    end
+  end
+
+  describe "protocols" do
+    test "GPOS.Subtable protocol is implemented" do
+      assert is_binary(GPOS.Subtable.compile(%ChainedSequenceContext3{}, []))
+    end
+
+    test "GSUB.Subtable protocol is implemented" do
+      assert is_binary(GSUB.Subtable.compile(%ChainedSequenceContext3{}, []))
     end
   end
 

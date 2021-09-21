@@ -1,12 +1,13 @@
 defmodule PixelFont.TableSource.OTFLayout.SequenceContext2Test do
   use PixelFont.Case, async: true
   alias PixelFont.Glyph
+  alias PixelFont.TableSource.{GPOS, GSUB}
   alias PixelFont.TableSource.OTFLayout.ClassDefinition
   alias PixelFont.TableSource.OTFLayout.SequenceContext2
 
-  setup [:setup_mock, :verify_on_exit!]
-
   describe "compile/2" do
+    setup [:setup_mock, :verify_on_exit!]
+
     test "properly compiles chained sequence context subtable format 2" do
       subtable = %SequenceContext2{
         input_classes: %ClassDefinition{
@@ -49,6 +50,16 @@ defmodule PixelFont.TableSource.OTFLayout.SequenceContext2Test do
         ])
 
       assert compiled_subtable === expected
+    end
+  end
+
+  describe "protocols" do
+    test "GPOS.Subtable protocol is implemented" do
+      assert is_binary(GPOS.Subtable.compile(%SequenceContext2{}, []))
+    end
+
+    test "GSUB.Subtable protocol is implemented" do
+      assert is_binary(GSUB.Subtable.compile(%SequenceContext2{}, []))
     end
   end
 
