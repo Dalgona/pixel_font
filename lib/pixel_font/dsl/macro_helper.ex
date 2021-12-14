@@ -10,11 +10,63 @@ defmodule PixelFont.DSL.MacroHelper do
       description: "this macro cannot be called directly"
   end
 
+  @typep exprs :: [Macro.t()]
+
   @doc false
-  @spec get_exprs(Macro.t()) :: [Macro.t()]
-  def get_exprs(do_block)
-  def get_exprs({:__block__, _, exprs}), do: exprs
-  def get_exprs(expr), do: [expr]
+  @spec get_exprs(Macro.t(), keyword()) :: {exprs(), Macro.t()}
+  def get_exprs(do_block, options \\ [])
+  def get_exprs({:__block__, _, exprs}, options), do: do_get_exprs(exprs, options)
+  def get_exprs(expr, options), do: do_get_exprs([expr], options)
+
+  @spec do_get_exprs(exprs(), keyword(), {exprs(), exprs()}) :: {exprs(), Macro.t()}
+  defp do_get_exprs(exprs, options, acc \\ {[], []})
+  defp do_get_exprs(exprs, [], {[], []}), do: {exprs, {:__block__, [], [nil]}}
+  defp do_get_exprs([], _, {exprs, []}), do: {Enum.reverse(exprs), {:__block__, [], [nil]}}
+
+  defp do_get_exprs([], _, {exprs, other}) do
+    {Enum.reverse(exprs), {:__block__, [], Enum.reverse(other)}}
+  end
+
+  defp do_get_exprs([expr | exprs], options, {filtered, other}) do
+    expected = Keyword.fetch!(options, :expected)
+    warn = options[:warn] || false
+
+    new_acc =
+      case expr do
+        {fun_name, _, args} when is_list(args) ->
+          if fun_name in expected do
+            {[expr | filtered], other}
+          else
+            warn_unexpected_expr(expr, warn)
+
+            {filtered, [expr | other]}
+          end
+
+        _ ->
+          warn_unexpected_expr(expr, warn)
+
+          {filtered, [expr | other]}
+      end
+
+    do_get_exprs(exprs, options, new_acc)
+  end
+
+  @spec warn_unexpected_expr(Macro.t(), boolean()) :: :ok
+  defp warn_unexpected_expr(expr, warn)
+  defp warn_unexpected_expr(_, false), do: :ok
+
+  defp warn_unexpected_expr(expr, true) do
+    [
+      "unexpected expression in block: \n",
+      :bright,
+      :cyan,
+      Macro.to_string(expr),
+      :reset,
+      "\nthis expression will be ignored"
+    ]
+    |> IO.ANSI.format()
+    |> IO.warn()
+  end
 
   @doc false
   @spec replace_call(Macro.t(), atom(), arity(), atom()) :: Macro.t()
