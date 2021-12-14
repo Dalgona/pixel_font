@@ -98,7 +98,7 @@ defmodule PixelFont.DSL.MacroHelper do
   defp handle_module_exprs(module_exprs, env) do
     module_exprs
     |> Enum.reverse()
-    |> Enum.map(& &1 |> get_exprs() |> elem(0))
+    |> Enum.map(&(&1 |> get_exprs() |> elem(0)))
     |> List.flatten()
     |> Macro.prewalk(fn
       {fun, meta, [{:lookups, _, _} | _]} when fun in ~w(def defp)a ->
