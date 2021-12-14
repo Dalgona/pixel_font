@@ -1,7 +1,7 @@
 defmodule PixelFont.Builder do
   alias PixelFont.Font
   alias PixelFont.GlyphStorage.GenServer, as: GlyphStorage
-  alias PixelFont.TableSource.{Cmap, DSIG, Glyf, GPOS, GSUB, Head, Hmtx, Maxp, Name, OS_2, Post}
+  alias PixelFont.TableSource.{Cmap, Glyf, GPOS, GSUB, Head, Hmtx, Maxp, Name, OS_2, Post}
 
   def build_ttf(%Font{} = font) do
     {:ok, _} = GlyphStorage.start_link(font.glyph_sources)
@@ -18,7 +18,6 @@ defmodule PixelFont.Builder do
       Cmap.compile(),
       Post.compile(font.metrics, 2),
       OS_2.compile(font.os_2, font.metrics, 4),
-      DSIG.compile_dummy(),
       font.gpos_lookups |> GPOS.from_lookups() |> GPOS.compile(),
       font.gsub_lookups |> GSUB.from_lookups() |> GSUB.compile()
     ]
