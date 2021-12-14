@@ -3,7 +3,7 @@ defmodule PixelFont.GlyphSource do
   require PixelFont.RectilinearShape.Path, as: Path
   import PixelFont.DSL.MacroHelper
   alias PixelFont.Glyph
-  alias PixelFont.Glyph.{BitmapData, CompositeData}
+  alias PixelFont.Glyph.{BitmapData, CompositeData, VariationSequence}
 
   @type source_options :: [based_on: module()]
 
@@ -17,7 +17,7 @@ defmodule PixelFont.GlyphSource do
   @spec glyph_source(module(), do: Macro.t()) :: Macro.t()
   @spec glyph_source(module(), source_options(), do: Macro.t()) :: Macro.t()
   defmacro glyph_source(name, options \\ [], do: do_block) do
-    exprs = get_exprs(do_block)
+    {exprs, _block} = get_exprs(do_block)
 
     map_expr =
       quote do
@@ -59,21 +59,22 @@ defmodule PixelFont.GlyphSource do
   end
 
   defmacro bmp_glyph(id, do: block) do
+    {glyph_exprs, block} = get_exprs(block, expected: ~w(variations)a)
+    {bmp_data_exprs, _block} = get_exprs(block, expected: ~w(advance bounds data)a, warn: true)
+
+    data_expr =
+      quote do
+        struct!(
+          BitmapData,
+          [{:contours, []} | List.flatten(unquote(bmp_data_exprs))]
+        )
+      end
+
     quote do
       if true do
-        import unquote(__MODULE__), only: [advance: 1, bounds: 2, data: 1]
+        import unquote(__MODULE__), only: [advance: 1, bounds: 2, data: 1, variations: 2]
 
-        {
-          unquote(id),
-          %Glyph{
-            id: unquote(id),
-            data:
-              struct!(
-                BitmapData,
-                [{:contours, []} | List.flatten(unquote(get_exprs(block)))]
-              )
-          }
-        }
+        {unquote(id), unquote(glyph_expr(id, glyph_exprs, data_expr))}
       end
     end
   end
@@ -111,19 +112,21 @@ defmodule PixelFont.GlyphSource do
   end
 
   defmacro composite_glyph(id, do: block) do
+    {glyph_exprs, block} = get_exprs(block, expected: ~w(variations)a)
+    {composite_data_exprs, _block} = get_exprs(block)
+
+    data_expr =
+      quote do
+        %CompositeData{
+          components: Enum.reject(unquote(composite_data_exprs), &is_nil/1)
+        }
+      end
+
     quote do
       if true do
-        import unquote(__MODULE__), only: [component: 3, component: 4]
+        import unquote(__MODULE__), only: [component: 3, component: 4, variations: 2]
 
-        {
-          unquote(id),
-          %Glyph{
-            id: unquote(id),
-            data: %CompositeData{
-              components: Enum.reject(unquote(get_exprs(block)), &is_nil/1)
-            }
-          }
-        }
+        {unquote(id), unquote(glyph_expr(id, glyph_exprs, data_expr))}
       end
     end
   end
@@ -145,6 +148,33 @@ defmodule PixelFont.GlyphSource do
         y_offset: unquote(y_off),
         flags: unquote(opts)[:flags] || []
       }
+    end
+  end
+
+  defp glyph_expr(id, glyph_exprs, data_expr) do
+    quote do
+      struct!(
+        Glyph,
+        [{:id, unquote(id)}, {:data, unquote(data_expr)} | unquote(glyph_exprs)]
+      )
+    end
+  end
+
+  defmacro variations([default: default_vs], do: block) when default_vs in 1..256 do
+    non_default_map_expr =
+      block
+      |> Map.new(fn
+        {:->, _, [[vs], target_glyph_id]} when vs in 1..256 ->
+          {vs, target_glyph_id}
+      end)
+      |> Macro.escape()
+
+    quote do
+      {:variations,
+       %VariationSequence{
+         default: unquote(default_vs),
+         non_default: unquote(non_default_map_expr)
+       }}
     end
   end
 end

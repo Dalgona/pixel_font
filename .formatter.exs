@@ -11,6 +11,7 @@
       advance: 1,
       bounds: 2,
       data: 1,
+      variations: 2,
 
       # From the Name Table DSL (PixelFont.NameTable)
       name_table: 2,
