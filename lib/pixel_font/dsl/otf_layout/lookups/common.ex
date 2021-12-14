@@ -23,6 +23,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.Common do
     expr_groups =
       do_block
       |> get_exprs()
+      |> elem(0)
       |> Enum.group_by(fn
         {:feature, _, [_, _]} -> :features
         _ -> :others

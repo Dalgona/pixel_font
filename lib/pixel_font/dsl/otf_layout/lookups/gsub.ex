@@ -71,7 +71,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
       (fn ->
          import unquote(__MODULE__), only: [substitute: 2]
 
-         unquote(__MODULE__).__make_single_subtable__(unquote(get_exprs(do_block)))
+         unquote(__MODULE__).__make_single_subtable__(unquote(do_block |> get_exprs() |> elem(0)))
        end).()
     end
   end
@@ -81,7 +81,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
       (fn ->
          import unquote(__MODULE__), only: [substitute: 2]
 
-         %Ligature1{substitutions: unquote(get_exprs(do_block))}
+         %Ligature1{substitutions: unquote(do_block |> get_exprs() |> elem(0))}
        end).()
     end
   end
@@ -97,7 +97,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
       (fn ->
          import Common, only: [backtrack: 1, input: 1, input: 2, lookahead: 1]
 
-         Common.__make_chained_ctx_subtable__(unquote(get_exprs(do_block)))
+         Common.__make_chained_ctx_subtable__(unquote(do_block |> get_exprs() |> elem(0)))
        end).()
     end
   end
@@ -108,7 +108,9 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
          import Common, only: [backtrack: 1, lookahead: 1]
          import unquote(__MODULE__), only: [substitute: 2]
 
-         unquote(__MODULE__).__make_reverse_chaining_ctx_subtable__(unquote(get_exprs(do_block)))
+         unquote(__MODULE__).__make_reverse_chaining_ctx_subtable__(
+           unquote(do_block |> get_exprs() |> elem(0))
+         )
        end).()
     end
   end

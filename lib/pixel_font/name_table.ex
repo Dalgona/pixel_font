@@ -34,7 +34,7 @@ defmodule PixelFont.NameTable do
           platform: 3,
           encoding: 1,
           language: Defs.windows_lang_id(unquote(lang)),
-          records: unquote(get_exprs(do_block))
+          records: unquote(do_block |> get_exprs() |> elem(0))
         }
       end
 

@@ -53,7 +53,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GPOS do
       (fn ->
          import Common, only: [backtrack: 1, input: 1, input: 2, lookahead: 1]
 
-         Common.__make_chained_ctx_subtable__(unquote(get_exprs(do_block)))
+         Common.__make_chained_ctx_subtable__(unquote(do_block |> get_exprs() |> elem(0)))
        end).()
     end
   end
