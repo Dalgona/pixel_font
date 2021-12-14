@@ -14,7 +14,7 @@ defmodule PixelFont.TableSource.Name.Definitions do
       iso_10646: 2,
       unicode_20_bmp: 3,
       unicode_20_full: 4,
-      unicode_variation: 5,
+      unicode_vs: 5,
       unicode_full: 6
     },
     macintosh: %{
