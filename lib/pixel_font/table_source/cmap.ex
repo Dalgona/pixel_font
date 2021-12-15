@@ -7,20 +7,35 @@ defmodule PixelFont.TableSource.Cmap do
 
   @spec compile() :: CompiledTable.t()
   def compile do
-    unicode_ranges = get_unicode_ranges()
-    seg_count = length(unicode_ranges) + 1
-    subtable_size = 16 + seg_count * 8
-    platform_id = Defs.platform_id(:windows)
-    encoding_id = Defs.encoding_id(:windows, :unicode_bmp)
+    all_glyphs = GlyphStorage.all()
+
+    {encoding_record, encoding_subtable} = compile_encoding_subtable(all_glyphs, 12)
 
     data = [
       # 'cmap' table version
       <<0::16>>,
       # Number of subtable(s)
       <<1::16>>,
-      # The only subtable record :)
-      [<<platform_id::16, encoding_id::16, 12::32>>],
-      [
+      # Subtable records
+      [encoding_record],
+      # Subtables
+      [encoding_subtable]
+    ]
+
+    CompiledTable.new("cmap", IO.iodata_to_binary(data))
+  end
+
+  defp compile_encoding_subtable(all_glyphs, offset) do
+    unicode_ranges = get_unicode_ranges(all_glyphs)
+    seg_count = length(unicode_ranges) + 1
+    subtable_size = 16 + seg_count * 8
+    platform_id = Defs.platform_id(:windows)
+    encoding_id = Defs.encoding_id(:windows, :unicode_bmp)
+
+    subtable_record = <<platform_id::16, encoding_id::16, offset::32>>
+
+    subtable =
+      IO.iodata_to_binary([
         # Subtable format 4: Segment mapping to delta values
         <<4::16>>,
         <<subtable_size::16>>,
@@ -28,10 +43,9 @@ defmodule PixelFont.TableSource.Cmap do
         lookup_fields(seg_count),
         cmap_data(unicode_ranges),
         <<0::seg_count*16>>
-      ]
-    ]
+      ])
 
-    CompiledTable.new("cmap", IO.iodata_to_binary(data))
+    {subtable_record, subtable}
   end
 
   defp lookup_fields(seg_count) do
@@ -57,9 +71,7 @@ defmodule PixelFont.TableSource.Cmap do
     ]
   end
 
-  defp get_unicode_ranges do
-    all_glyphs = GlyphStorage.all()
-
+  defp get_unicode_ranges(all_glyphs) do
     [c | cs] =
       all_glyphs
       |> Enum.filter(&is_integer(&1.id))
