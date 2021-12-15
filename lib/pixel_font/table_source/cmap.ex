@@ -2,6 +2,7 @@ defmodule PixelFont.TableSource.Cmap do
   require PixelFont.Util, as: Util
   import Util, only: :macros
   alias PixelFont.CompiledTable
+  alias PixelFont.Glyph
   alias PixelFont.GlyphStorage
   alias PixelFont.TableSource.Name.Definitions, as: Defs
 
@@ -9,17 +10,26 @@ defmodule PixelFont.TableSource.Cmap do
   def compile do
     all_glyphs = GlyphStorage.all()
 
-    {encoding_record, encoding_subtable} = compile_encoding_subtable(all_glyphs, 12)
+    offset = 20
+    {variations_record, variations_subtable} = compile_variation_sequences(all_glyphs, offset)
+    offset = offset + byte_size(variations_subtable)
+    {encoding_record, encoding_subtable} = compile_encoding_subtable(all_glyphs, offset)
 
     data = [
       # 'cmap' table version
       <<0::16>>,
       # Number of subtable(s)
-      <<1::16>>,
+      <<2::16>>,
       # Subtable records
-      [encoding_record],
+      [
+        variations_record,
+        encoding_record
+      ],
       # Subtables
-      [encoding_subtable]
+      [
+        variations_subtable,
+        encoding_subtable
+      ]
     ]
 
     CompiledTable.new("cmap", IO.iodata_to_binary(data))
@@ -72,24 +82,155 @@ defmodule PixelFont.TableSource.Cmap do
   end
 
   defp get_unicode_ranges(all_glyphs) do
-    [c | cs] =
+    all_glyphs
+    |> Enum.filter(&is_integer(&1.id))
+    |> Enum.map(& &1.id)
+    |> chunk_into_ranges()
+  end
+
+  defp compile_variation_sequences(all_glyphs, offset) do
+    variation_sequences = build_variation_sequences(all_glyphs)
+    platform_id = Defs.platform_id(:unicode)
+    encoding_id = Defs.encoding_id(:unicode, :unicode_vs)
+    selectors_count = length(variation_sequences)
+    offset_base = 10 + 11 * selectors_count
+
+    [compiled_records, compiled_tables] =
+      variation_sequences
+      |> compile_uvs_tables(offset_base)
+      |> Enum.unzip()
+      |> Tuple.to_list()
+      |> Enum.map(&IO.iodata_to_binary/1)
+
+    subtable_record = <<platform_id::16, encoding_id::16, offset::32>>
+
+    subtable =
+      IO.iodata_to_binary([
+        # Subtable format 14: Unicode Variation Sequences
+        <<14::16>>,
+        # length
+        <<offset_base + byte_size(compiled_tables)::32>>,
+        # numVarSelectorRecords
+        <<selectors_count::32>>,
+        # varSelector[]
+        [compiled_records],
+        # Default/Non-default UVS Tables
+        [compiled_tables]
+      ])
+
+    {subtable_record, subtable}
+  end
+
+  defp build_variation_sequences(all_glyphs) do
+    {default_uvs, non_default_uvs} =
       all_glyphs
-      |> Enum.filter(&is_integer(&1.id))
-      |> Enum.map(& &1.id)
-      |> Enum.sort()
+      |> Enum.filter(& &1.variations)
+      |> Enum.map(fn %Glyph{id: id, variations: variations} ->
+        default_variation = selector_codepoint(variations.default)
 
-    Enum.chunk_while(cs, {c, c}, &chunk_fun/2, &after_fun/1)
+        non_default_variations =
+          Enum.map(variations.non_default, fn {vs_num, to_glyph} ->
+            {selector_codepoint(vs_num), {id, gid!(to_glyph)}}
+          end)
+
+        {{default_variation, id}, non_default_variations}
+      end)
+      |> Enum.unzip()
+
+    default_uvs = consolidate_default_uvs(default_uvs)
+    non_default_uvs = consolidate_non_default_uvs(non_default_uvs)
+
+    default_uvs
+    |> Map.merge(non_default_uvs, fn _key, map1, map2 ->
+      Map.merge(map1, map2, fn _key, list1, list2 -> list1 ++ list2 end)
+    end)
+    |> Enum.sort_by(&elem(&1, 0))
   end
 
-  defp chunk_fun(c, {first, last}) do
-    if c === last + 1 do
-      {:cont, {first, c}}
-    else
-      {:cont, first..last, {c, c}}
-    end
+  @spec selector_codepoint(1..256) :: 0..0xFFFFFF
+  defp selector_codepoint(vs_num)
+  defp selector_codepoint(vs_num) when vs_num in 1..16, do: 0xFDFF + vs_num
+  defp selector_codepoint(vs_num) when vs_num in 17..256, do: 0x0E00EF + vs_num
+
+  defp consolidate_default_uvs(default_uvs) do
+    default_uvs
+    |> Enum.group_by(&elem(&1, 0), &elem(&1, 1))
+    |> Map.new(fn {key, values} ->
+      unicode_ranges =
+        values
+        |> chunk_into_ranges()
+        |> Enum.map(fn first..last -> {first, last - first} end)
+
+      {key, %{default: unicode_ranges}}
+    end)
   end
 
-  defp after_fun({first, last}) do
-    {:cont, first..last, nil}
+  defp consolidate_non_default_uvs(non_default_uvs) do
+    non_default_uvs
+    |> List.flatten()
+    |> Enum.group_by(&elem(&1, 0), &elem(&1, 1))
+    |> Map.new(fn {key, value} -> {key, %{non_default: value}} end)
+  end
+
+  defp compile_uvs_tables(variation_sequences, offset, acc \\ [])
+  defp compile_uvs_tables([], _offset, acc), do: Enum.reverse(acc)
+
+  defp compile_uvs_tables([{selector, map} | seqs], offset, acc) do
+    {default_offset, default_uvs} = compile_default_uvs(map[:default], offset)
+
+    {non_default_offset, non_default_uvs} =
+      compile_non_default_uvs(map[:non_default], offset + byte_size(default_uvs))
+
+    record = <<selector::24, default_offset::32, non_default_offset::32>>
+    tables = default_uvs <> non_default_uvs
+
+    compile_uvs_tables(seqs, offset + byte_size(tables), [{record, tables} | acc])
+  end
+
+  defp compile_default_uvs(maybe_uvs, offset)
+  defp compile_default_uvs(nil, _offset), do: {0, <<>>}
+
+  defp compile_default_uvs(unicode_ranges, offset) do
+    table =
+      IO.iodata_to_binary([
+        <<length(unicode_ranges)::32>>,
+        unicode_ranges
+        |> Enum.sort_by(&elem(&1, 0))
+        |> Enum.map(fn {start, count} -> <<start::24, count::8>> end)
+      ])
+
+    {offset, table}
+  end
+
+  defp compile_non_default_uvs(maybe_uvs, offset)
+  defp compile_non_default_uvs(nil, _offset), do: {0, <<>>}
+
+  defp compile_non_default_uvs(mappings, offset) do
+    table =
+      IO.iodata_to_binary([
+        <<length(mappings)::32>>,
+        mappings
+        |> Enum.sort_by(&elem(&1, 0))
+        |> Enum.map(fn {base_unicode, gid} -> <<base_unicode::24, gid::16>> end)
+      ])
+
+    {offset, table}
+  end
+
+  defp chunk_into_ranges(values) do
+    [x | xs] = Enum.sort(values)
+
+    Enum.chunk_while(
+      xs,
+      {x, x},
+      fn x, {first, last} ->
+        if x === last + 1 do
+          {:cont, {first, x}}
+        else
+          {:cont, first..last, {x, x}}
+        end
+      end,
+      fn {first, last} -> {:cont, first..last, nil} end
+    )
   end
 end
