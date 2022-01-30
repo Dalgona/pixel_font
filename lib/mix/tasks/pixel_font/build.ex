@@ -6,6 +6,8 @@ defmodule Mix.Tasks.PixelFont.Build do
 
   @impl true
   def run(args) do
+    Mix.Task.run("compile")
+
     mix_project = Mix.Project.get!().project()
     pixel_font_opts = Keyword.fetch!(mix_project, :pixel_font)
     font_module = Keyword.fetch!(pixel_font_opts, :font_module)
@@ -24,7 +26,7 @@ defmodule Mix.Tasks.PixelFont.Build do
     |> Enum.find(&(elem(&1, 0) === Defs.name_id(:postscript_name)))
     |> case do
       nil -> "font"
-      font_name when is_binary(font_name) -> font_name
+      {_name_id, font_name} when is_binary(font_name) -> font_name
     end
   end
 end
