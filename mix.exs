@@ -5,7 +5,7 @@ defmodule PixelFont.Mixfile do
     [
       app: :pixel_font,
       version: "0.1.0",
-      elixir: "~> 1.11",
+      elixir: "~> 1.13",
       deps: deps(),
       dialyzer: [
         plt_add_apps: [:mix]
@@ -27,7 +27,7 @@ defmodule PixelFont.Mixfile do
 
   defp deps do
     [
-      {:dialyxir, "~> 1.0", only: :dev, runtime: false},
+      {:dialyxir, "~> 1.1", only: :dev, runtime: false},
       {:excoveralls, "~> 0.14", only: :test},
       {:mox, "~> 1.0", only: :test}
     ]
