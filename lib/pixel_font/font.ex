@@ -19,4 +19,6 @@ defmodule PixelFont.Font do
           gpos_lookups: [module()],
           gsub_lookups: [module()]
         }
+
+  @callback font([binary()]) :: t()
 end
