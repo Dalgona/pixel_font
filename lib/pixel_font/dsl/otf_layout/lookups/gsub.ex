@@ -7,6 +7,7 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
   alias PixelFont.DSL.OTFLayout.Lookups.Common
   alias PixelFont.Glyph
   alias PixelFont.TableSource.GSUB
+  alias PixelFont.TableSource.GSUB.Alternate1
   alias PixelFont.TableSource.GSUB.Ligature1
   alias PixelFont.TableSource.GSUB.ReverseChainingContext1
   alias PixelFont.TableSource.GSUB.Single1
@@ -28,6 +29,15 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
       imports: [substitutions__1: 1],
       type: 1,
       ast_transform: &replace_call(&1, :substitutions, 1, :substitutions__1),
+      runtime_transform: & &1
+    }
+  end
+
+  def __handle_lookup__(:alternate) do
+    %{
+      imports: [substitutions__3: 1],
+      type: 3,
+      ast_transform: &replace_call(&1, :substitutions, 1, :substitutions__3),
       runtime_transform: & &1
     }
   end
@@ -72,6 +82,16 @@ defmodule PixelFont.DSL.OTFLayout.Lookups.GSUB do
          import unquote(__MODULE__), only: [substitute: 2]
 
          unquote(__MODULE__).__make_single_subtable__(unquote(do_block |> get_exprs() |> elem(0)))
+       end).()
+    end
+  end
+
+  defmacro substitutions__3(do: do_block) do
+    quote do
+      (fn ->
+         import unquote(__MODULE__), only: [substitute: 2]
+
+         %Alternate1{alternatives: unquote(do_block |> get_exprs() |> elem(0))}
        end).()
     end
   end

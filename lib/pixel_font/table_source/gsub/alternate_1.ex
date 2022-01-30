@@ -3,7 +3,7 @@ defmodule PixelFont.TableSource.GSUB.Alternate1 do
 
   defstruct alternatives: %{}
 
-  @type t :: %__MODULE__{alternatives: %{optional(Glyph.id()) => [Glyph.id()]}}
+  @type t :: %__MODULE__{alternatives: [{Glyph.id(), [Glyph.id()]}]}
 
   defimpl PixelFont.TableSource.GSUB.Subtable do
     require PixelFont.Util
