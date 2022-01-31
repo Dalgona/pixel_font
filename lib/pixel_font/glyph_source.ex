@@ -63,28 +63,27 @@ defmodule PixelFont.GlyphSource do
 
   defmacro bmp_glyph(id, do: block) do
     {glyph_exprs, block} = get_exprs(block, expected: ~w(variations)a)
-    {bmp_data_exprs, _block} = get_exprs(block, expected: ~w(advance bounds data)a, warn: true)
-
-    data_expr =
-      quote do
-        struct!(
-          BitmapData,
-          [{:contours, []} | List.flatten(unquote(bmp_data_exprs))]
-        )
-      end
 
     quote do
       if true do
         import unquote(__MODULE__), only: [advance: 1, bounds: 2, data: 1, variations: 2]
 
-        {unquote(id), unquote(glyph_expr(id, glyph_exprs, data_expr))}
+        var!(bmp_data) = %BitmapData{}
+
+        unquote(block)
+
+        {unquote(id), unquote(glyph_expr(id, glyph_exprs, quote(do: var!(bmp_data))))}
       end
     end
   end
 
   Enum.each(~w(advance data)a, fn key ->
     @spec unquote(key)(Macro.t()) :: Macro.t()
-    defmacro unquote(key)(expr), do: {unquote(key), expr}
+    defmacro unquote(key)(expr) do
+      quote(bind_quoted: [key: unquote(key), expr: expr]) do
+        var!(bmp_data) = struct!(var!(bmp_data), [{key, expr}])
+      end
+    end
   end)
 
   @spec bounds(Macro.t(), Macro.t()) :: Macro.t()
@@ -92,7 +91,11 @@ defmodule PixelFont.GlyphSource do
     {:.., _, [xmin, xmax]} = x_bounds
     {:.., _, [ymin, ymax]} = y_bounds
 
-    [xmin: xmin, xmax: xmax, ymin: ymin, ymax: ymax]
+    fields_expr = [xmin: xmin, xmax: xmax, ymin: ymin, ymax: ymax]
+
+    quote do
+      var!(bmp_data) = struct!(var!(bmp_data), unquote(fields_expr))
+    end
   end
 
   def __make_contours__(glyphs) do
@@ -116,18 +119,22 @@ defmodule PixelFont.GlyphSource do
 
   defmacro composite_glyph(id, do: block) do
     {glyph_exprs, block} = get_exprs(block, expected: ~w(variations)a)
-    {composite_data_exprs, _block} = get_exprs(block)
 
     data_expr =
       quote do
-        %CompositeData{
-          components: Enum.reject(unquote(composite_data_exprs), &is_nil/1)
-        }
+        %CompositeData{components: Enum.reject(var!(components), &is_nil/1)}
       end
 
     quote do
       if true do
         import unquote(__MODULE__), only: [component: 3, component: 4, variations: 2]
+
+        {:ok, var!(agent)} = Agent.start_link(fn -> [] end)
+
+        unquote(block)
+
+        var!(components) = Agent.get(var!(agent), &Enum.reverse(&1))
+        :ok = Agent.stop(var!(agent))
 
         {unquote(id), unquote(glyph_expr(id, glyph_exprs, data_expr))}
       end
@@ -144,13 +151,19 @@ defmodule PixelFont.GlyphSource do
 
   defp handle_component(glyph_id, x_off, y_off, opts) do
     quote do
-      %{
-        glyph_id: unquote(glyph_id),
-        glyph: nil,
-        x_offset: unquote(x_off),
-        y_offset: unquote(y_off),
-        flags: unquote(opts)[:flags] || []
-      }
+      Agent.update(
+        var!(agent),
+        &[
+          %{
+            glyph_id: unquote(glyph_id),
+            glyph: nil,
+            x_offset: unquote(x_off),
+            y_offset: unquote(y_off),
+            flags: unquote(opts)[:flags] || []
+          }
+          | &1
+        ]
+      )
     end
   end
 
