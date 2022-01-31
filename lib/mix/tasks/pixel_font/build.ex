@@ -1,5 +1,6 @@
 defmodule Mix.Tasks.PixelFont.Build do
   use Mix.Task
+  alias Mix.Tasks.PixelFont.Common
   alias PixelFont.Builder
   alias PixelFont.Font
   alias PixelFont.TableSource.Name.Definitions, as: Defs
@@ -8,10 +9,7 @@ defmodule Mix.Tasks.PixelFont.Build do
   def run(args) do
     Mix.Task.run("compile")
 
-    mix_project = Mix.Project.get!().project()
-    pixel_font_opts = Keyword.fetch!(mix_project, :pixel_font)
-    font_module = Keyword.fetch!(pixel_font_opts, :font_module)
-    %Font{} = font = font_module.font(args)
+    font = Common.get_font(args)
     ttf = Builder.build_ttf(font)
 
     "#{output_filename(font)}.ttf"
