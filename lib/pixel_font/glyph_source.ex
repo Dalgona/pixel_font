@@ -18,6 +18,7 @@ defmodule PixelFont.GlyphSource do
   @spec glyph_source(module(), source_options(), do: Macro.t()) :: Macro.t()
   defmacro glyph_source(name, options \\ [], do: do_block) do
     {exprs, _block} = get_exprs(do_block)
+    {module_block, exprs} = handle_module(exprs, __CALLER__)
 
     map_expr =
       quote do
@@ -30,6 +31,8 @@ defmodule PixelFont.GlyphSource do
     quote do
       defmodule unquote(name) do
         import unquote(__MODULE__), only: [bmp_glyph: 2, composite_glyph: 2]
+
+        unquote(module_block)
 
         @glyph_map unquote(map_expr)
         @glyph_list @glyph_map |> Map.values() |> Enum.sort(&(&1.id <= &2.id))
