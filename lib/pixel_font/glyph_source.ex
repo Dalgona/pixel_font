@@ -16,8 +16,9 @@ defmodule PixelFont.GlyphSource do
 
   @spec glyph_source(module(), do: Macro.t()) :: Macro.t()
   @spec glyph_source(module(), source_options(), do: Macro.t()) :: Macro.t()
-  defmacro glyph_source(name, options \\ [], do: do_block) do
-    {exprs, _block} = get_exprs(do_block)
+  defmacro glyph_source(name, _options \\ [], do: do_block) do
+    {based_on_exprs, block} = get_exprs(do_block, expected: [:based_on])
+    {exprs, _block} = get_exprs(block)
     {module_block, exprs} = handle_module(exprs, __CALLER__)
 
     map_expr =
@@ -26,7 +27,7 @@ defmodule PixelFont.GlyphSource do
         |> List.flatten()
         |> unquote(__MODULE__).__make_contours__()
       end
-      |> handle_based_on(options[:based_on])
+      |> handle_based_on(based_on_exprs)
 
     quote do
       defmodule unquote(name) do
@@ -45,20 +46,48 @@ defmodule PixelFont.GlyphSource do
     end
   end
 
-  defp handle_based_on(map_expr, expr)
-  defp handle_based_on(map_expr, nil), do: map_expr
+  defmacro based_on(_module, _options \\ []), do: block_direct_invocation!(__CALLER__)
 
-  defp handle_based_on(map_expr, module) when is_atom(module) do
-    quote(do: Map.merge(unquote(module).__glyph__map__(), unquote(map_expr)))
+  defp handle_based_on(map_expr, based_on_exprs)
+  defp handle_based_on(map_expr, []), do: map_expr
+
+  defp handle_based_on(map_expr, [{:based_on, meta, [module]}]) do
+    handle_based_on(map_expr, [{:based_on, meta, [module, []]}])
   end
 
-  defp handle_based_on(map_expr, {:__aliases__, _, _} = alias_expr) do
-    quote(do: Map.merge(unquote(alias_expr).__glyph_map__(), unquote(map_expr)))
+  defp handle_based_on(map_expr, [{:based_on, _meta, [module, options]}]) do
+    ensure_module!(module)
+
+    quote do
+      unquote(module).__glyph_map__()
+      |> Enum.filter(unquote(filter_fun_expr(options)))
+      |> Map.new()
+      |> Map.merge(unquote(map_expr))
+    end
   end
 
-  defp handle_based_on(_map_expr, x) do
-    raise "expected the value of :based_on keyword to be known " <>
-            "as an atom or an alias in compilation time, got: #{inspect(x)}"
+  defp handle_based_on(_map_expr, [_ | _] = exprs) do
+    raise "`based_on` directive must be used at most once, " <>
+            "found #{length(exprs)} occurrences"
+  end
+
+  @spec ensure_module!(Macro.t()) :: :ok | no_return()
+  defp ensure_module!(expr)
+  defp ensure_module!(expr) when is_atom(expr), do: :ok
+  defp ensure_module!({:__aliases__, _meta, [_ | _]}), do: :ok
+
+  defp ensure_module!(expr) do
+    raise "expected the value of `module` to be known as a module " <>
+            "during compilation time, got: #{inspect(expr)}"
+  end
+
+  @spec filter_fun_expr(keyword()) :: Macro.t()
+  defp filter_fun_expr(options) do
+    case Keyword.get(options, :only) do
+      nil -> quote(do: fn _ -> true end)
+      :unicode -> quote(do: fn {_, %Glyph{id: id}} -> is_integer(id) end)
+      :named -> quote(do: fn {_, %Glyph{id: id}} -> is_binary(id) end)
+    end
   end
 
   defmacro bmp_glyph(id, do: block) do
