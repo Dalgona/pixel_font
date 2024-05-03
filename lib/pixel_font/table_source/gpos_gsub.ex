@@ -2,6 +2,7 @@ defmodule PixelFont.TableSource.GPOSGSUB do
   require PixelFont.Util
   import PixelFont.Util, only: :macros
   alias PixelFont.CompiledTable
+  alias PixelFont.Font.Metrics
   alias PixelFont.TableSource.GPOS
   alias PixelFont.TableSource.GSUB
   alias PixelFont.TableSource.OTFLayout.Feature
@@ -123,12 +124,13 @@ defmodule PixelFont.TableSource.GPOSGSUB do
   @spec make_language(language_tag(), [Feature.id()]) :: LanguageSystem.t()
   defp make_language(tag, features), do: %LanguageSystem{tag: tag, features: features}
 
-  @spec compile(t()) :: CompiledTable.t()
-  def compile(%struct{} = table) when struct in [GPOS, GSUB] do
+  @spec compile(t(), Metrics.t()) :: CompiledTable.t()
+  def compile(%struct{} = table, %Metrics{} = metrics) when struct in [GPOS, GSUB] do
     table = preprocess(table)
     offset_base = 14
 
     list_compile_opts = [
+      metrics: metrics,
       feature_indices: table.feature_indices,
       lookup_indices: table.lookup_indices
     ]

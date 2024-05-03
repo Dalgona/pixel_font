@@ -1,5 +1,6 @@
 defmodule PixelFont.TableSource.GSUB do
   alias PixelFont.CompiledTable
+  alias PixelFont.Font.Metrics
   alias PixelFont.TableSource.GPOSGSUB
   alias PixelFont.TableSource.GSUB.Subtable
   alias PixelFont.TableSource.OTFLayout.FeatureList
@@ -25,8 +26,8 @@ defmodule PixelFont.TableSource.GSUB do
     struct!(__MODULE__, GPOSGSUB.__from_lookups__(lookup_modules))
   end
 
-  @spec compile(t()) :: CompiledTable.t()
-  defdelegate compile(gsub), to: GPOSGSUB
+  @spec compile(t(), Metrics.t()) :: CompiledTable.t()
+  defdelegate compile(gsub, metrics), to: GPOSGSUB
 
   @spec compile_subtable(map(), integer(), keyword()) :: binary()
   def compile_subtable(subtable, _lookup_type, opts) do

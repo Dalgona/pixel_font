@@ -6,6 +6,7 @@ defmodule PixelFont.TableSource.OS_2 do
   alias PixelFont.GlyphStorage
   alias PixelFont.TableSource.OS_2.Enums
   alias PixelFont.TableSource.OS_2.UnicodeRanges
+  import Metrics, only: [scale: 2]
 
   defstruct avg_char_width: :auto,
             weight_class: :normal,
@@ -53,7 +54,7 @@ defmodule PixelFont.TableSource.OS_2 do
   def compile(%__MODULE__{} = params, %Metrics{} = metrics, 4) do
     all_glyphs = GlyphStorage.all()
     unicode_glyphs = Enum.filter(all_glyphs, &is_integer(&1.id))
-    avg_char_width = calculate_avg_char_width(all_glyphs, params)
+    avg_char_width = scale(metrics, calculate_avg_char_width(all_glyphs, params))
 
     {first_char, last_char} =
       unicode_glyphs
@@ -79,16 +80,16 @@ defmodule PixelFont.TableSource.OS_2 do
         # Usage Permissions
         convert_embedding(params.embedding)::4
       >>,
-      <<elem(params.subscript_size, 0)::16>>,
-      <<elem(params.subscript_size, 1)::16>>,
-      <<elem(params.subscript_offset, 0)::16>>,
-      <<elem(params.subscript_offset, 1)::16>>,
-      <<elem(params.superscript_size, 0)::16>>,
-      <<elem(params.superscript_size, 1)::16>>,
-      <<elem(params.superscript_offset, 0)::16>>,
-      <<elem(params.superscript_offset, 1)::16>>,
-      <<params.strike_size::16>>,
-      <<params.strike_position::16>>,
+      <<scale(metrics, elem(params.subscript_size, 0))::16>>,
+      <<scale(metrics, elem(params.subscript_size, 1))::16>>,
+      <<scale(metrics, elem(params.subscript_offset, 0))::16>>,
+      <<scale(metrics, elem(params.subscript_offset, 1))::16>>,
+      <<scale(metrics, elem(params.superscript_size, 0))::16>>,
+      <<scale(metrics, elem(params.superscript_size, 1))::16>>,
+      <<scale(metrics, elem(params.superscript_offset, 0))::16>>,
+      <<scale(metrics, elem(params.superscript_offset, 1))::16>>,
+      <<scale(metrics, params.strike_size)::16>>,
+      <<scale(metrics, params.strike_position)::16>>,
       <<Enums.family_class(params.family_class)::little-16>>,
       params.panose,
       # ulUnicodeRange1..4
@@ -99,20 +100,20 @@ defmodule PixelFont.TableSource.OS_2 do
       <<first_char::16>>,
       <<last_char::16>>,
       # sTypoAscender
-      <<metrics.ascender::16>>,
+      <<scale(metrics, metrics.ascender)::16>>,
       # sTypoDescender
-      <<-metrics.descender::16>>,
-      <<metrics.line_gap::16>>,
+      <<scale(metrics, -metrics.descender)::16>>,
+      <<scale(metrics, metrics.line_gap)::16>>,
       # usWinAscent
-      <<metrics.ascender::16>>,
+      <<scale(metrics, metrics.ascender)::16>>,
       # usWinDescent
-      <<metrics.descender::16>>,
+      <<scale(metrics, metrics.descender)::16>>,
       # ulCodePageRange1
       <<0b0100_0000_0010_1000_0000_0000_0000_0000::32>>,
       # ulCodePageRange2
       <<0b0000_0000_0000_0000_0000_0000_0000_0000::32>>,
-      <<params.x_height::16>>,
-      <<params.cap_height::16>>,
+      <<scale(metrics, params.x_height)::16>>,
+      <<scale(metrics, params.cap_height)::16>>,
       # usDefaultChar
       <<0::16>>,
       # usBreakChar

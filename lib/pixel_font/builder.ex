@@ -6,8 +6,8 @@ defmodule PixelFont.Builder do
   def build_ttf(%Font{} = font) do
     {:ok, _} = GlyphStorage.start_link(font.glyph_sources)
 
-    glyf = Glyf.generate()
-    hmtx = Hmtx.generate()
+    glyf = Glyf.generate(font.metrics)
+    hmtx = Hmtx.generate(font.metrics)
     maxp = Maxp.generate()
 
     compiled_tables = [
@@ -18,8 +18,8 @@ defmodule PixelFont.Builder do
       Cmap.compile(),
       Post.compile(font.metrics, 2),
       OS_2.compile(font.os_2, font.metrics, 4),
-      font.gpos_lookups |> GPOS.from_lookups() |> GPOS.compile(),
-      font.gsub_lookups |> GSUB.from_lookups() |> GSUB.compile()
+      font.gpos_lookups |> GPOS.from_lookups() |> GPOS.compile(font.metrics),
+      font.gsub_lookups |> GSUB.from_lookups() |> GSUB.compile(font.metrics)
     ]
 
     :ok = GenServer.stop(GlyphStorage)

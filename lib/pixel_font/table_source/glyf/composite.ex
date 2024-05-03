@@ -1,4 +1,5 @@
 defmodule PixelFont.TableSource.Glyf.Composite do
+  alias PixelFont.Font.Metrics
   alias PixelFont.Glyph
   alias PixelFont.Glyph.CompositeData
 
@@ -6,23 +7,26 @@ defmodule PixelFont.TableSource.Glyf.Composite do
 
   @type t :: %__MODULE__{components: [[binary]]}
 
-  @spec new([CompositeData.glyph_component()]) :: t()
-  def new(components) do
-    %__MODULE__{components: make_data(components, [])}
+  @spec new([CompositeData.glyph_component()], Metrics.t()) :: t()
+  def new(components, %Metrics{} = metrics) do
+    %__MODULE__{components: make_data(components, metrics, [])}
   end
 
-  defp make_data(component, acc)
+  defp make_data(component, metrics, acc)
 
-  defp make_data([component], acc) do
-    Enum.reverse([do_make_data(component, 0) | acc])
+  defp make_data([component], %Metrics{} = metrics, acc) do
+    Enum.reverse([do_make_data(component, metrics, 0) | acc])
   end
 
-  defp make_data([component | components], acc) do
-    make_data(components, [do_make_data(component, 1) | acc])
+  defp make_data([component | components], %Metrics{} = metrics, acc) do
+    make_data(components, metrics, [do_make_data(component, metrics, 1) | acc])
   end
 
-  defp do_make_data(component, more) do
+  defp do_make_data(component, %Metrics{} = metrics, more) do
     %{glyph: %Glyph{gid: gid}, x_offset: xoff, y_offset: yoff, flags: flags} = component
+    xoff = Metrics.scale(metrics, xoff)
+    yoff = Metrics.scale(metrics, yoff)
+    args_are_words = xoff > 127 or xoff < -128 or yoff > 127 or yoff < -128
 
     [
       # flags
@@ -54,12 +58,16 @@ defmodule PixelFont.TableSource.Glyf.Composite do
         # 0x0002 - ARGS_ARE_XY_VALUES
         1::1,
         # 0x0001 - ARG_1_AND_2_ARE_WORDS
-        0::1
+        (args_are_words && 1 || 0)::1
       >>,
       # glyph index
       <<gid::big-16>>,
       # args
-      <<xoff::big-8, yoff::big-8>>
+      if(
+        args_are_words,
+        do: <<xoff::signed-16, yoff::signed-16>>,
+        else: <<xoff::signed-8, yoff::signed-8>>
+      )
     ]
   end
 end

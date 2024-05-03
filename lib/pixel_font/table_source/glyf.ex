@@ -1,5 +1,6 @@
 defmodule PixelFont.TableSource.Glyf do
   alias PixelFont.CompiledTable
+  alias PixelFont.Font.Metrics
   alias PixelFont.GlyphStorage
   alias PixelFont.TableSource.Glyf.Item
 
@@ -7,9 +8,9 @@ defmodule PixelFont.TableSource.Glyf do
 
   @type t :: %__MODULE__{items: [Item.t()]}
 
-  @spec generate() :: t()
-  def generate do
-    %__MODULE__{items: Enum.map(GlyphStorage.all(), &Item.new/1)}
+  @spec generate(Metrics.t()) :: t()
+  def generate(%Metrics{} = metrics) do
+    %__MODULE__{items: Enum.map(GlyphStorage.all(), &Item.new(&1, metrics))}
   end
 
   @spec compile(t()) :: [CompiledTable.t()]

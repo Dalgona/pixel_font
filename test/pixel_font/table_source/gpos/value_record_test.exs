@@ -1,22 +1,27 @@
 defmodule PixelFont.TableSource.GPOS.ValueRecordTest do
   use PixelFont.Case, async: true
+  alias PixelFont.Font.Metrics
   alias PixelFont.TableSource.GPOS.ValueRecord
 
+  setup_all do
+    [metrics: %Metrics{units_per_em: 1024, pixels_per_em: 16}]
+  end
+
   describe "compile/2" do
-    test "compiles value records property" do
+    test "compiles value records property", ctx do
       value_record = %ValueRecord{x_placement: 10, x_advance: 20}
 
       compiled_value_record =
         value_record
-        |> ValueRecord.compile(~w(x_placement x_advance)a)
+        |> ValueRecord.compile(~w(x_placement x_advance)a, ctx.metrics)
         |> IO.iodata_to_binary()
 
-      expected = <<10::16, 20::16>>
+      expected = <<640::16, 1280::16>>
 
       assert compiled_value_record === expected
     end
 
-    test "discards values not specified in the value format" do
+    test "discards values not specified in the value format", ctx do
       value_record = %ValueRecord{
         x_placement: 10,
         y_placement: 20,
@@ -26,15 +31,15 @@ defmodule PixelFont.TableSource.GPOS.ValueRecordTest do
 
       compiled_value_record =
         value_record
-        |> ValueRecord.compile(~w(x_placement x_advance)a)
+        |> ValueRecord.compile(~w(x_placement x_advance)a, ctx.metrics)
         |> IO.iodata_to_binary()
 
-      expected = <<10::16, 30::16>>
+      expected = <<640::16, 1920::16>>
 
       assert compiled_value_record === expected
     end
 
-    test "sorts values in a proper order even if the value format is scrambled" do
+    test "sorts values in a proper order even if the value format is scrambled", ctx do
       value_record = %ValueRecord{
         x_placement: 10,
         y_placement: 20,
@@ -44,10 +49,10 @@ defmodule PixelFont.TableSource.GPOS.ValueRecordTest do
 
       compiled_value_record =
         value_record
-        |> ValueRecord.compile(~w(y_advance y_placement x_advance x_placement)a)
+        |> ValueRecord.compile(~w(y_advance y_placement x_advance x_placement)a, ctx.metrics)
         |> IO.iodata_to_binary()
 
-      expected = <<10::16, 20::16, 30::16, 40::16>>
+      expected = <<640::16, 1280::16, 1920::16, 2560::16>>
 
       assert compiled_value_record === expected
     end

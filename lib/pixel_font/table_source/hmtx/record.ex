@@ -1,6 +1,8 @@
 defmodule PixelFont.TableSource.Hmtx.Record do
+  alias PixelFont.Font.Metrics
   alias PixelFont.Glyph
   alias PixelFont.Glyph.{BitmapData, CompositeData}
+  import Metrics, only: [scale: 2]
 
   defstruct ~w(advance lsb xmin xmax glyph_empty?)a
 
@@ -12,28 +14,28 @@ defmodule PixelFont.TableSource.Hmtx.Record do
           glyph_empty?: boolean()
         }
 
-  @spec new(Glyph.t()) :: t()
-  def new(glyph)
+  @spec new(Glyph.t(), Metrics.t()) :: t()
+  def new(glyph, metrics)
 
-  def new(%Glyph{data: %BitmapData{} = data}) do
+  def new(%Glyph{data: %BitmapData{} = data}, %Metrics{} = metrics) do
     %__MODULE__{
-      advance: data.advance,
-      lsb: data.xmin,
-      xmin: data.xmin,
-      xmax: data.xmax,
+      advance: scale(metrics, data.advance),
+      lsb: scale(metrics, data.xmin),
+      xmin: scale(metrics, data.xmin),
+      xmax: scale(metrics, data.xmax),
       glyph_empty?: Enum.empty?(data.contours)
     }
   end
 
-  def new(%Glyph{data: %CompositeData{} = data}) do
+  def new(%Glyph{data: %CompositeData{} = data}, %Metrics{} = metrics) do
     case Enum.find(data.components, &(:use_my_metrics in &1.flags)) do
-      nil -> calculate_metrics_from_components(data.components)
-      %{glyph: glyph} -> new(glyph)
+      nil -> calculate_metrics_from_components(data.components, metrics)
+      %{glyph: glyph} -> new(glyph, metrics)
     end
   end
 
-  @spec calculate_metrics_from_components([CompositeData.glyph_component()]) :: t()
-  defp calculate_metrics_from_components(components) do
+  @spec calculate_metrics_from_components([CompositeData.glyph_component()], Metrics.t()) :: t()
+  defp calculate_metrics_from_components(components, %Metrics{} = font_metrics) do
     metrics =
       Enum.map(components, fn %{glyph: %Glyph{data: %BitmapData{} = data}, x_offset: xoff} ->
         %{
@@ -43,9 +45,9 @@ defmodule PixelFont.TableSource.Hmtx.Record do
         }
       end)
 
-    advance = metrics |> Enum.map(& &1.advance) |> Enum.max(fn -> 0 end)
-    xmin = metrics |> Enum.map(& &1.xmin) |> Enum.min(fn -> 0 end)
-    xmax = metrics |> Enum.map(& &1.xmax) |> Enum.max(fn -> 0 end)
+    advance = scale(font_metrics, metrics |> Enum.map(& &1.advance) |> Enum.max(fn -> 0 end))
+    xmin = scale(font_metrics, metrics |> Enum.map(& &1.xmin) |> Enum.min(fn -> 0 end))
+    xmax = scale(font_metrics, metrics |> Enum.map(& &1.xmax) |> Enum.max(fn -> 0 end))
 
     %__MODULE__{
       advance: advance,

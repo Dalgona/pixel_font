@@ -3,14 +3,15 @@ defmodule PixelFont.TableSource.Hmtx do
   alias PixelFont.Font.Metrics
   alias PixelFont.GlyphStorage
   alias PixelFont.TableSource.Hmtx.Record
+  import Metrics, only: [scale: 2]
 
   defstruct ~w(records)a
 
   @type t :: %__MODULE__{records: [Record.t()]}
 
-  @spec generate() :: t()
-  def generate do
-    %__MODULE__{records: Enum.map(GlyphStorage.all(), &Record.new/1)}
+  @spec generate(Metrics.t()) :: t()
+  def generate(%Metrics{} = metrics) do
+    %__MODULE__{records: Enum.map(GlyphStorage.all(), &Record.new(&1, metrics))}
   end
 
   @spec compile(t(), Metrics.t()) :: [CompiledTable.t()]
@@ -59,9 +60,9 @@ defmodule PixelFont.TableSource.Hmtx do
       [
         # MajorVersion, MinorVersion
         <<1::big-16, 0::big-16>>,
-        <<metrics.ascender::big-16>>,
-        <<-metrics.descender::big-16>>,
-        <<metrics.line_gap::big-16>>,
+        <<scale(metrics, metrics.ascender)::big-16>>,
+        <<scale(metrics, -metrics.descender)::big-16>>,
+        <<scale(metrics, metrics.line_gap)::big-16>>,
         <<max_adv::big-16>>,
         <<min_lsb::big-16>>,
         <<min_rsb::big-16>>,

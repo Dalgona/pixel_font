@@ -4,6 +4,7 @@ defmodule PixelFont.TableSource.Post do
   alias PixelFont.Glyph
   alias PixelFont.GlyphStorage
   alias PixelFont.TableSource.Post.AGLFN
+  import Metrics, only: [scale: 2]
 
   @spec compile(Metrics.t(), integer()) :: CompiledTable.t()
   def compile(metrics, version)
@@ -33,8 +34,8 @@ defmodule PixelFont.TableSource.Post do
       <<0, 2, 0, 0>>,
       # Italic angle
       <<0::16, 0::16>>,
-      <<metrics.underline_position::16>>,
-      <<metrics.underline_size::16>>,
+      <<scale(metrics, metrics.underline_position)::16>>,
+      <<scale(metrics, metrics.underline_size)::16>>,
       <<if(metrics.is_fixed_pitch, do: 1, else: 0)::32>>,
       # Memory usage (zero if unknown)
       <<0::4*32>>,

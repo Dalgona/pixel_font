@@ -19,13 +19,16 @@ defmodule PixelFont.TableSource.GPOS.PairAdjustment2 do
         }
 
   defimpl PixelFont.TableSource.GPOS.Subtable do
+    alias PixelFont.Font.Metrics
     alias PixelFont.TableSource.GPOS.PairAdjustment2
     alias PixelFont.TableSource.GPOS.ValueRecord
     alias PixelFont.TableSource.OTFLayout.ClassDefinition
     alias PixelFont.TableSource.OTFLayout.GlyphCoverage
 
     @spec compile(PairAdjustment2.t(), keyword()) :: binary()
-    def compile(subtable, _opts) do
+    def compile(subtable, opts) do
+      %Metrics{} = metrics = Keyword.fetch!(opts, :metrics)
+
       %PairAdjustment2{
         class_1: class_1,
         class_2: class_2,
@@ -45,14 +48,14 @@ defmodule PixelFont.TableSource.GPOS.PairAdjustment2 do
           case records[{c1, c2}] do
             nil ->
               [
-                ValueRecord.compile(%ValueRecord{}, vf_1),
-                ValueRecord.compile(%ValueRecord{}, vf_2)
+                ValueRecord.compile(%ValueRecord{}, vf_1, metrics),
+                ValueRecord.compile(%ValueRecord{}, vf_2, metrics)
               ]
 
             {record_1, record_2} ->
               [
-                ValueRecord.compile(record_1, vf_1),
-                ValueRecord.compile(record_2, vf_2)
+                ValueRecord.compile(record_1, vf_1, metrics),
+                ValueRecord.compile(record_2, vf_2, metrics)
               ]
           end
         end

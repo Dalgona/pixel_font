@@ -13,17 +13,19 @@ defmodule PixelFont.TableSource.GPOS.SingleAdjustment1 do
         }
 
   defimpl PixelFont.TableSource.GPOS.Subtable do
+    alias PixelFont.Font.Metrics
     alias PixelFont.TableSource.GPOS.SingleAdjustment1
     alias PixelFont.TableSource.GPOS.ValueRecord
     alias PixelFont.TableSource.OTFLayout.GlyphCoverage
 
     @spec compile(SingleAdjustment1.t(), keyword()) :: binary()
-    def compile(subtable, _opts) do
+    def compile(subtable, opts) do
+      %Metrics{} = metrics = Keyword.fetch!(opts, :metrics)
       compiled_coverage = GlyphCoverage.compile(subtable.glyphs)
 
       compiled_value =
         subtable.value
-        |> ValueRecord.compile(subtable.value_format)
+        |> ValueRecord.compile(subtable.value_format, metrics)
         |> IO.iodata_to_binary()
 
       IO.iodata_to_binary([

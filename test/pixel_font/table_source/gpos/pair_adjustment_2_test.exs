@@ -1,15 +1,20 @@
 defmodule PixelFont.TableSource.GPOS.PairAdjustment2Test do
   use PixelFont.Case, async: true
+  alias PixelFont.Font.Metrics
   alias PixelFont.Glyph
   alias PixelFont.TableSource.GPOS.PairAdjustment2
   alias PixelFont.TableSource.GPOS.Subtable
   alias PixelFont.TableSource.GPOS.ValueRecord
   alias PixelFont.TableSource.OTFLayout.ClassDefinition
 
+  setup_all do
+    [metrics: %Metrics{units_per_em: 1024, pixels_per_em: 16}]
+  end
+
   describe "compile/2" do
     setup [:setup_mock, :verify_on_exit!]
 
-    test "compiles pair adjustment positioning subtable format 2" do
+    test "compiles pair adjustment positioning subtable format 2", ctx do
       subtable = %PairAdjustment2{
         class_1: %ClassDefinition{
           assignments: %{1 => 'abc', 2 => 'def'}
@@ -26,7 +31,7 @@ defmodule PixelFont.TableSource.GPOS.PairAdjustment2Test do
         }
       }
 
-      compiled_subtable = Subtable.compile(subtable, [])
+      compiled_subtable = Subtable.compile(subtable, [metrics: ctx.metrics])
 
       expected =
         to_wordstring([
@@ -34,8 +39,8 @@ defmodule PixelFont.TableSource.GPOS.PairAdjustment2Test do
           # Class records,
           [
             [[0, 0], [0, 0], [0, 0]],
-            [[0, 0], [1, 2], [0, 0]],
-            [[3, 4], [0, 0], [5, 6]]
+            [[0, 0], [64, 128], [0, 0]],
+            [[192, 256], [0, 0], [320, 384]]
           ],
           # Coverage table
           [2, 1, ?a, ?f, 0],

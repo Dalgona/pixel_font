@@ -1,4 +1,6 @@
 defmodule PixelFont.TableSource.GPOS.ValueRecord do
+  alias PixelFont.Font.Metrics
+
   defstruct x_placement: 0,
             y_placement: 0,
             x_advance: 0,
@@ -18,13 +20,13 @@ defmodule PixelFont.TableSource.GPOS.ValueRecord do
     y_advance: 0x08
   ]
 
-  @spec compile(t(), [atom()]) :: iodata()
-  def compile(record, value_format) do
+  @spec compile(t(), [atom()], Metrics.t()) :: iodata()
+  def compile(record, value_format, %Metrics{} = metrics) do
     record
     |> Map.take(value_format)
     |> Enum.map(fn {k, v} -> {flag_value(k), v} end)
     |> Enum.sort_by(&elem(&1, 0))
-    |> Enum.map(&<<elem(&1, 1)::16>>)
+    |> Enum.map(&<<Metrics.scale(metrics, elem(&1, 1))::signed-16>>)
   end
 
   @spec compile_value_format([atom()]) :: binary()
