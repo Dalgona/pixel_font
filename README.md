@@ -27,9 +27,9 @@ If you are in doubt, see [The NeoDunggeunmo Project](https://github.com/Dalgona/
 
 ## License
 
-Copyright 2020 Eunbin Jeong (Dalgona.) &lt;me@dalgona.dev&gt;
+Copyright 2024 Eunbin Jeong (Dalgona.) &lt;me@dalgona.dev&gt;
 
-This software is not yet released for general availability, and it shall be used only for building font projects I am working on, just for now. Once this project is mature enough, it will be released under the MIT license.
+This project is still under early development, but its source codes are released under the MIT license. See `LICENSE` file for the full text.
 
 _OpenType is a registered trademark of Microsoft Corporation._
 
