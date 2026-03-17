@@ -5,19 +5,24 @@ defmodule PixelFont.Mixfile do
     [
       app: :pixel_font,
       version: "0.1.0",
-      elixir: "~> 1.13",
+      elixir: "~> 1.19",
       deps: deps(),
       dialyzer: [
         plt_add_apps: [:mix]
       ],
       test_coverage: [tool: ExCoveralls],
-      preferred_cli_env: [
+      elixirc_paths: elixirc_paths(Mix.env())
+    ]
+  end
+
+  def cli do
+    [
+      preferred_envs: [
         coveralls: :test,
         "coveralls.detail": :test,
         "coveralls.post": :test,
         "coveralls.html": :test
-      ],
-      elixirc_paths: elixirc_paths(Mix.env())
+      ]
     ]
   end
 
@@ -27,9 +32,9 @@ defmodule PixelFont.Mixfile do
 
   defp deps do
     [
-      {:dialyxir, "~> 1.1", only: :dev, runtime: false},
-      {:excoveralls, "~> 0.14", only: :test},
-      {:mox, "~> 1.0", only: :test}
+      {:dialyxir, "~> 1.4", only: :dev, runtime: false},
+      {:excoveralls, "~> 0.18.5", only: :test},
+      {:mox, "~> 1.2", only: :test}
     ]
   end
 end
