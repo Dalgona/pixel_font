@@ -11,7 +11,7 @@ defmodule PixelFont.TableSource.OTFLayout.SequenceContext2Test do
     test "properly compiles chained sequence context subtable format 2" do
       subtable = %SequenceContext2{
         input_classes: %ClassDefinition{
-          assignments: %{1 => 'abc', 2 => 'def', 3 => 'ghi'}
+          assignments: %{1 => ~c"abc", 2 => ~c"def", 3 => ~c"ghi"}
         },
         rulesets: %{
           1 => [

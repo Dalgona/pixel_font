@@ -9,7 +9,7 @@ defmodule PixelFont.TableSource.GSUB.Ligature1Test do
 
     test "compiles ligature substitution subtable format 1" do
       subtable = %Ligature1{
-        substitutions: [{'abc', ?X}, {'ab', ?Y}, {'def', ?Z}]
+        substitutions: [{~c"abc", ?X}, {~c"ab", ?Y}, {~c"def", ?Z}]
       }
 
       compiled_subtable = Subtable.compile(subtable, [])
@@ -21,8 +21,8 @@ defmodule PixelFont.TableSource.GSUB.Ligature1Test do
           [1, 2, ?a, ?d],
           # Ligature set tables
           [
-            [2, 6, 14, [?X, 3, 'bc'], [?Y, 2, 'b']],
-            [1, 4, [?Z, 3, 'ef']]
+            [2, 6, 14, [?X, 3, ~c"bc"], [?Y, 2, ~c"b"]],
+            [1, 4, [?Z, 3, ~c"ef"]]
           ]
         ])
 

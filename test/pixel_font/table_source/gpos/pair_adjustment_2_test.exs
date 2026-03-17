@@ -17,10 +17,10 @@ defmodule PixelFont.TableSource.GPOS.PairAdjustment2Test do
     test "compiles pair adjustment positioning subtable format 2", ctx do
       subtable = %PairAdjustment2{
         class_1: %ClassDefinition{
-          assignments: %{1 => 'abc', 2 => 'def'}
+          assignments: %{1 => ~c"abc", 2 => ~c"def"}
         },
         class_2: %ClassDefinition{
-          assignments: %{1 => 'pqr', 2 => 'xyz'}
+          assignments: %{1 => ~c"pqr", 2 => ~c"xyz"}
         },
         value_format_1: [:x_advance],
         value_format_2: [:x_placement],
@@ -31,7 +31,7 @@ defmodule PixelFont.TableSource.GPOS.PairAdjustment2Test do
         }
       }
 
-      compiled_subtable = Subtable.compile(subtable, [metrics: ctx.metrics])
+      compiled_subtable = Subtable.compile(subtable, metrics: ctx.metrics)
 
       expected =
         to_wordstring([

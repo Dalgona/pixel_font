@@ -12,9 +12,9 @@ defmodule PixelFont.TableSource.OTFLayout.ChainedSequenceContext1Test do
         rulesets: %{
           ?a => [
             %{
-              backtrack: 'zyx',
-              input: 'bc',
-              lookahead: 'def',
+              backtrack: ~c"zyx",
+              input: ~c"bc",
+              lookahead: ~c"def",
               lookup_records: [{0, "Lookup 1"}, {2, "Lookup 2"}]
             }
           ]
@@ -36,7 +36,7 @@ defmodule PixelFont.TableSource.OTFLayout.ChainedSequenceContext1Test do
             [
               [1, 4],
               # Rule tables
-              [[3, 'zyx', 3, 'bc', 3, 'def', 2, 0, 10, 2, 20]]
+              [[3, ~c"zyx", 3, ~c"bc", 3, ~c"def", 2, 0, 10, 2, 20]]
             ]
           ]
         ])

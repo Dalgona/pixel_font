@@ -1,10 +1,10 @@
 defmodule PixelFont.Util do
   @spec sigil_i(Macro.t(), keyword()) :: Macro.t()
   defmacro sigil_i(str_expr, mods)
-  defmacro sigil_i(str_expr, ''), do: do_sigil_i(str_expr, 10)
-  defmacro sigil_i(str_expr, 'o'), do: do_sigil_i(str_expr, 8)
-  defmacro sigil_i(str_expr, 'd'), do: do_sigil_i(str_expr, 10)
-  defmacro sigil_i(str_expr, 'x'), do: do_sigil_i(str_expr, 16)
+  defmacro sigil_i(str_expr, ~c""), do: do_sigil_i(str_expr, 10)
+  defmacro sigil_i(str_expr, ~c"o"), do: do_sigil_i(str_expr, 8)
+  defmacro sigil_i(str_expr, ~c"d"), do: do_sigil_i(str_expr, 10)
+  defmacro sigil_i(str_expr, ~c"x"), do: do_sigil_i(str_expr, 16)
 
   @spec do_sigil_i(Macro.t(), integer()) :: Macro.t()
   defp do_sigil_i(str_expr, base) do

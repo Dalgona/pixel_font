@@ -13,7 +13,7 @@ defmodule PixelFont.TableSource.GSUB.Single2Test do
 
       expected =
         to_wordstring([
-          [2, 16, 5, 'abcde'],
+          [2, 16, 5, ~c"abcde"],
           # Coverage table
           [2, 1, ?A, ?E, 0]
         ])

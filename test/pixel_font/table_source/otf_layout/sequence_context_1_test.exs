@@ -11,7 +11,7 @@ defmodule PixelFont.TableSource.OTFLayout.SequenceContext1Test do
       subtable = %SequenceContext1{
         rulesets: %{
           ?a => [
-            %{input: 'bc', lookup_records: [{0, "Lookup 1"}, {2, "Lookup 2"}]}
+            %{input: ~c"bc", lookup_records: [{0, "Lookup 1"}, {2, "Lookup 2"}]}
           ]
         }
       }
@@ -30,7 +30,7 @@ defmodule PixelFont.TableSource.OTFLayout.SequenceContext1Test do
               [1, 4],
               # Sequence rule tables
               [
-                [3, 2, 'bc', [[0, 10], [2, 20]]]
+                [3, 2, ~c"bc", [[0, 10], [2, 20]]]
               ]
             ]
           ]

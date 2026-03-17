@@ -116,7 +116,7 @@ defmodule PixelFont.RectilinearShape.EdgeGenerator do
     fun = fn set, orientation ->
       set
       |> MapSet.difference(common)
-      |> Enum.map(&Tuple.append(&1, orientation))
+      |> Enum.map(&Tuple.insert_at(&1, tuple_size(&1), orientation))
     end
 
     fun.(pos_edges, :positive) ++ fun.(neg_edges, :negative)

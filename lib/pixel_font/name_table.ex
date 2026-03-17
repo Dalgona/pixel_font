@@ -62,7 +62,7 @@ defmodule PixelFont.NameTable do
             "should be accessed through predefined macros"
   end
 
-  defmacro font_specific_name(id, _value) when id in (unquote(last_id) + 1)..255 do
+  defmacro font_specific_name(id, _value) when id in (unquote(last_id) + 1)..255//1 do
     raise "name IDs between #{unquote(last_id) + 1} and 255 " <>
             "are reserved for future uses, and must not be used"
   end

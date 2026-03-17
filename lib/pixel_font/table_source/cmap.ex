@@ -159,7 +159,7 @@ defmodule PixelFont.TableSource.Cmap do
       unicode_ranges =
         values
         |> chunk_into_ranges()
-        |> Enum.map(fn first..last -> {first, last - first} end)
+        |> Enum.map(fn first..last//1 -> {first, last - first} end)
 
       {key, %{default: unicode_ranges}}
     end)

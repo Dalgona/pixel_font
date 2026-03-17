@@ -58,7 +58,7 @@ defmodule PixelFont.TableSource.Head do
   end
 
   @spec update_checksum_adjustment(CompiledTable.t(), binary()) :: CompiledTable.t()
-  def update_checksum_adjustment(head, ttf) do
+  def update_checksum_adjustment(%CompiledTable{} = head, ttf) do
     dwords = for <<x::32 <- ttf>>, do: x
     dword_sum = Enum.reduce(dwords, 0, &Kernel.+/2)
     checksum_adjustment = <<0xB1B0AFBA - dword_sum::big-32>>

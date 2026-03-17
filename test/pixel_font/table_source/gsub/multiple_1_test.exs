@@ -9,16 +9,16 @@ defmodule PixelFont.TableSource.GSUB.Multiple1Test do
 
     @tag glyph_storage_get_count: 6
     test "compiles multiple substitution subtable format 1" do
-      subtable = %Multiple1{substitutions: [{?A, 'aa'}, {?B, 'bb'}]}
+      subtable = %Multiple1{substitutions: [{?A, ~c"aa"}, {?B, ~c"bb"}]}
       compiled_subtable = Subtable.compile(subtable, [])
 
       expected =
         to_wordstring([
           [1, 10, 2, 18, 24],
           # Coverage table
-          [1, 2, 'AB'],
+          [1, 2, ~c"AB"],
           # Sequence tables
-          [[2, 'aa'], [2, 'bb']]
+          [[2, ~c"aa"], [2, ~c"bb"]]
         ])
 
       assert compiled_subtable === expected
@@ -26,7 +26,7 @@ defmodule PixelFont.TableSource.GSUB.Multiple1Test do
 
     @tag glyph_storage_get_count: 1
     test "raises an error when substitution sequence is empty" do
-      subtable = %Multiple1{substitutions: [{?A, ''}]}
+      subtable = %Multiple1{substitutions: [{?A, ~c""}]}
 
       assert_raise ArgumentError, fn -> Subtable.compile(subtable, []) end
     end

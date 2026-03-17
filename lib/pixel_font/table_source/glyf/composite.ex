@@ -58,7 +58,7 @@ defmodule PixelFont.TableSource.Glyf.Composite do
         # 0x0002 - ARGS_ARE_XY_VALUES
         1::1,
         # 0x0001 - ARG_1_AND_2_ARE_WORDS
-        (args_are_words && 1 || 0)::1
+        (args_are_words && 1) || 0::1
       >>,
       # glyph index
       <<gid::big-16>>,

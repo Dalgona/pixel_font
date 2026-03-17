@@ -10,7 +10,7 @@ defmodule PixelFont.TableSource.OTFLayout.ClassDefinitionTest do
     test "compiles Class definition table in a format which emits less bytes" do
       # Format 1: 6 + 2 * 6 = 18 bytes (selected)
       # Format 2: 4 + 6 * 3 = 22 bytes
-      classes1 = %ClassDefinition{assignments: %{1 => 'ab', 2 => 'cd', 3 => 'ef'}}
+      classes1 = %ClassDefinition{assignments: %{1 => ~c"ab", 2 => ~c"cd", 3 => ~c"ef"}}
       compiled_classes1 = ClassDefinition.compile(classes1)
 
       expected1 =
@@ -24,7 +24,7 @@ defmodule PixelFont.TableSource.OTFLayout.ClassDefinitionTest do
 
       # Format 1: 6 + 2 * 6 = 18 bytes
       # Format 2: 4 + 6 * 1 = 10 bytes (selected)
-      classes2 = %ClassDefinition{assignments: %{1 => 'abcdef'}}
+      classes2 = %ClassDefinition{assignments: %{1 => ~c"abcdef"}}
       compiled_classes2 = ClassDefinition.compile(classes2)
 
       expected2 =
@@ -41,7 +41,7 @@ defmodule PixelFont.TableSource.OTFLayout.ClassDefinitionTest do
   describe "compile/1, with non-consecutive glyph IDs" do
     @tag glyph_storage_get_count: 4
     test "compiles Class definition table format 2" do
-      classes = %ClassDefinition{assignments: %{1 => '09', 2 => 'az'}}
+      classes = %ClassDefinition{assignments: %{1 => ~c"09", 2 => ~c"az"}}
       compiled_classes = ClassDefinition.compile(classes)
 
       expected =

@@ -7,7 +7,7 @@ defmodule PixelFont.TableSource.GSUB.Single1Test do
   describe "compile/2" do
     test "compiles single substitution subtable format 1" do
       subtable = %Single1{
-        gids: GlyphCoverage.of('ABCDE'),
+        gids: GlyphCoverage.of(~c"ABCDE"),
         gid_diff: 32
       }
 

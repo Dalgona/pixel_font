@@ -88,7 +88,7 @@ defmodule PixelFont.GlyphStorage.GenServer do
   defp set_glyph_index(glyphs, acc, index)
   defp set_glyph_index([], acc, _), do: Enum.reverse(acc)
 
-  defp set_glyph_index([g | gs], acc, index) do
+  defp set_glyph_index([%Glyph{} = g | gs], acc, index) do
     set_glyph_index(gs, [%Glyph{g | gid: index} | acc], index + 1)
   end
 

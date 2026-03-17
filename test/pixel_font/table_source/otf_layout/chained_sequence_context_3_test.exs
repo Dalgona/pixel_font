@@ -10,9 +10,9 @@ defmodule PixelFont.TableSource.OTFLayout.ChainedSequenceContext3Test do
 
     test "properly compiles chained sequence context subtable format 3" do
       subtable = %ChainedSequenceContext3{
-        backtrack: [GlyphCoverage.of('abc')],
-        input: [GlyphCoverage.of('def'), GlyphCoverage.of('ghi')],
-        lookahead: [GlyphCoverage.of('jkl')],
+        backtrack: [GlyphCoverage.of(~c"abc")],
+        input: [GlyphCoverage.of(~c"def"), GlyphCoverage.of(~c"ghi")],
+        lookahead: [GlyphCoverage.of(~c"jkl")],
         lookup_records: [{0, "Lookup 1"}, {1, "Lookup 2"}]
       }
 

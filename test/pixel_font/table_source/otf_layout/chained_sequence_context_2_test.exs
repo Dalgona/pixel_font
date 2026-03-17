@@ -10,9 +10,9 @@ defmodule PixelFont.TableSource.OTFLayout.ChainedSequenceContext2Test do
 
     test "properly compiles chained sequence context subtable format 2" do
       subtable = %ChainedSequenceContext2{
-        backtrack_classes: %ClassDefinition{assignments: %{1 => 'abc'}},
-        input_classes: %ClassDefinition{assignments: %{1 => 'def'}},
-        lookahead_classes: %ClassDefinition{assignments: %{1 => 'ghi'}},
+        backtrack_classes: %ClassDefinition{assignments: %{1 => ~c"abc"}},
+        input_classes: %ClassDefinition{assignments: %{1 => ~c"def"}},
+        lookahead_classes: %ClassDefinition{assignments: %{1 => ~c"ghi"}},
         rulesets: %{
           1 => [
             %{

@@ -10,8 +10,8 @@ defmodule PixelFont.TableSource.GSUB.ReverseChainingContext1Test do
 
     test "compiles reverse chaining contextual single substitution subtable format 1" do
       subtable = %ReverseChainingContext1{
-        backtrack: [GlyphCoverage.of('abc'), GlyphCoverage.of('def')],
-        lookahead: [GlyphCoverage.of('uvw'), GlyphCoverage.of('xyz')],
+        backtrack: [GlyphCoverage.of(~c"abc"), GlyphCoverage.of(~c"def")],
+        lookahead: [GlyphCoverage.of(~c"uvw"), GlyphCoverage.of(~c"xyz")],
         substitutions: [{?X, ?0}, {?Y, ?1}]
       }
 
@@ -19,9 +19,9 @@ defmodule PixelFont.TableSource.GSUB.ReverseChainingContext1Test do
 
       expected =
         to_wordstring([
-          [1, 22, 2, 30, 40, 2, 50, 60, 2, '01'],
+          [1, 22, 2, 30, 40, 2, 50, 60, 2, ~c"01"],
           # Coverage table
-          [1, 2, 'XY'],
+          [1, 2, ~c"XY"],
           # Backtrack coverage tables
           [[2, 1, ?a, ?c, 0], [2, 1, ?d, ?f, 0]],
           # Lookahead coverage tables
