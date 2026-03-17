@@ -38,10 +38,10 @@ defmodule PixelFont.TableSource.Head do
       timestamp,
       # Modified
       timestamp,
-      <<scale(metrics, Enum.min(xmin, zero))::16>>,
-      <<scale(metrics, Enum.min(ymin, zero))::16>>,
-      <<scale(metrics, Enum.max(xmax, zero))::16>>,
-      <<scale(metrics, Enum.max(ymax, zero))::16>>,
+      <<Enum.min(xmin, zero)::16>>,
+      <<Enum.min(ymin, zero)::16>>,
+      <<Enum.max(xmax, zero)::16>>,
+      <<Enum.max(ymax, zero)::16>>,
       # MacStyle
       <<0b0000_0000_0000_0000::16>>,
       # Lowest readable PPEM
