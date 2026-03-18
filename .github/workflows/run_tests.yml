@@ -8,19 +8,19 @@ jobs:
 
     env:
       MIX_ENV: test
-      OTP_VERSION: '24.0'
-      ELIXIR_VERSION: '1.13.2'
+      OTP_VERSION: '28.4'
+      ELIXIR_VERSION: '1.19.5'
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v6
     - name: Setup Elixir
       uses: erlef/setup-beam@v1
       with:
         otp-version: ${{ env.OTP_VERSION }}
         elixir-version: ${{ env.ELIXIR_VERSION }}
     - name: Cache Dependencies
-      uses: actions/cache@v2
+      uses: actions/cache@v4
       with:
         path: |
           _build
