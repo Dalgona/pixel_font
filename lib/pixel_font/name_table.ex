@@ -71,13 +71,13 @@ defmodule PixelFont.NameTable do
 
   @spec import_enter() :: Macro.t()
   defp import_enter do
-    {:import, [], [__MODULE__, [only: unquote(macro_arities)]]}
+    {:import, [], [__MODULE__, [only: unquote(macro_arities), warn: false]]}
   end
 
   @spec import_exit() :: Macro.t()
   defp import_exit do
     quote do
-      import unquote(__MODULE__), only: [name_records: 2]
+      import unquote(__MODULE__), only: [name_records: 2], warn: false
     end
   end
 end

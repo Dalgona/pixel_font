@@ -24,7 +24,7 @@ defmodule PixelFont.GlyphStorage.GenServer do
   def init(glyph_sources) do
     glyph_groups =
       glyph_sources
-      |> Enum.map(& &1.glyphs)
+      |> Enum.map(& &1.glyphs())
       |> List.flatten()
       |> Enum.group_by(&is_integer(&1.id))
 

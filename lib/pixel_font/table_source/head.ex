@@ -2,7 +2,6 @@ defmodule PixelFont.TableSource.Head do
   alias PixelFont.CompiledTable
   alias PixelFont.Font.Metrics
   alias PixelFont.TableSource.Glyf
-  import Metrics, only: [scale: 2]
 
   @spec compile(Version.t(), Glyf.t(), Metrics.t()) :: CompiledTable.t()
   def compile(version, glyf, %Metrics{} = metrics) do
